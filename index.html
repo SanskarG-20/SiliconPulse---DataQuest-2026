@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiliconPulse Live Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #020617;
+            --bg-card: rgba(15, 23, 42, 0.6);
+            --border-subtle: rgba(51, 65, 85, 0.4);
+            --neon-sky: #38bdf8;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: #f8fafc;
+            overflow: hidden;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { 
+            background: var(--bg-card); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid var(--border-subtle); 
+        }
+        .glass-hover:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+        .neon-text { color: var(--neon-sky); text-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }
+        .ticker-scroll { animation: ticker 40s linear infinite; }
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        .fade-edge-x {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.35.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
