@@ -1,4 +1,4 @@
-
+﻿
 export interface LiveEvent {
   id: string;
   timestamp: string;
