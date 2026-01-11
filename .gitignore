@@ -44,3 +44,6 @@ logs/
 # Build outputs
 frontend/dist/
 frontend/build/
+dist/
+dist-ssr/
+*.local

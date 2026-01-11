@@ -54,6 +54,9 @@ DATAQUEST/
 5. Create `.env` file in `backend/`:
    ```env
    GEMINI_API_KEY=your_api_key_here
+   DATA_STREAM_PATH=data/stream.jsonl
+   HOST=0.0.0.0
+   PORT=8000
    ```
 
 6. Run backend server:
@@ -136,8 +139,8 @@ Configured in `frontend/vite.config.ts`
 
 ### CORS
 Backend CORS is configured for:
-- `http://localhost:3000`
-- `http://127.0.0.1:3000`
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
 
 ## Troubleshooting
 
