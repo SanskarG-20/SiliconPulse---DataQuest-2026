@@ -38,3 +38,30 @@ class InjectResponse(BaseModel):
     """Response model for data injection"""
     status: str = Field(..., description="Status of the injection operation")
     injected_at: str = Field(..., description="Timestamp when the data was injected")
+
+
+class SignalCompact(BaseModel):
+    """Compact signal representation for list view"""
+    timestamp: Optional[str] = Field(None, description="Timestamp of the event")
+    company: Optional[str] = Field(None, description="Related company name")
+    event_type: Optional[str] = Field(None, description="Type of event")
+    title: str = Field(..., description="Title of the evidence")
+    source: Optional[str] = Field(None, description="Source of the information")
+
+
+class RadarStatus(BaseModel):
+    """Radar status for a company"""
+    company: str = Field(..., description="Company name")
+    activity_level: str = Field(..., description="Activity level (High/Moderate/Low)")
+    count: int = Field(..., description="Number of events in recent history")
+
+
+class GenerateRequest(BaseModel):
+    """Request model for generating insights with Gemini"""
+    query: str = Field(..., description="The user query")
+    context: str = Field(..., description="The formatted context string")
+
+
+class GenerateResponse(BaseModel):
+    """Response model for generated insights"""
+    insight: str = Field(..., description="The generated insight from Gemini")

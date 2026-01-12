@@ -1,176 +1,141 @@
-# SiliconPulse
+# ⚡ SiliconPulse
 
-Strategic Intelligence Platform - Real-time semiconductor and tech ecosystem monitoring.
+**Live Strategic Intelligence for the Semiconductor Industry**
 
-## Project Structure
+SiliconPulse is a real-time RAG (Retrieval-Augmented Generation) engine designed to monitor, analyze, and predict market shifts in the semiconductor sector. By combining live data streams with Gemini's reasoning capabilities, it provides instant strategic insights for executives and analysts.
 
+---
+
+## 🚀 What It Does
+
+- **Live Signal Ingestion**: Captures high-velocity market events (contracts, yields, launches) in real-time.
+- **Dynamic RAG**: Instantly retrieves the most relevant context for any query, ensuring answers are never stale.
+- **AI-Powered Insights**: Uses Google Gemini to synthesize scattered data points into executive-level briefings.
+- **Competitor Radar**: Tracks activity levels across key players (NVIDIA, TSMC, Apple) to spot emerging threats.
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    subgraph "Data Layer"
+        Stream[Live Data Stream] --> |JSONL| Ingest[Ingestion Engine]
+        Ingest --> Storage[(Vector/Stream Store)]
+    end
+
+    subgraph "Backend (FastAPI)"
+        API[API Gateway] --> QueryEngine
+        API --> Injector
+        QueryEngine --> |Retrieve| Storage
+        QueryEngine --> |Context| LLM[Google Gemini]
+    end
+
+    subgraph "Frontend (React + Vite)"
+        UI[Dashboard] --> |Poll| API
+        UI --> |Inject| Injector
+        UI --> |Query| QueryEngine
+    end
 ```
-DATAQUEST/
-├── frontend/          # React + TypeScript + Vite UI
-├── backend/           # FastAPI + Pathway backend
-├── data/              # Data files (stream.jsonl)
-└── docs/              # Documentation
-```
 
-## Prerequisites
+---
 
-- **Node.js** 18+ and npm
-- **Python** 3.10+
-- **pip** and **virtualenv** (recommended)
+## 🛠️ Setup & Installation
 
-## Quick Start
+### Prerequisites
+- Node.js (v18+)
+- Python (v3.10+)
+- Google Gemini API Key
 
-### Backend Setup
-
-1. Navigate to backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Create virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   ```
-
-3. Activate virtual environment:
-   - **Windows (PowerShell):**
-     ```powershell
-     .\venv\Scripts\Activate.ps1
-     ```
-   - **Windows (CMD):**
-     ```cmd
-     venv\Scripts\activate.bat
-     ```
-   - **Linux/Mac:**
-     ```bash
-     source venv/bin/activate
-     ```
-
-4. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. Create `.env` file in `backend/`:
-   ```env
-   GEMINI_API_KEY=your_api_key_here
-   DATA_STREAM_PATH=data/stream.jsonl
-   HOST=0.0.0.0
-   PORT=8000
-   ```
-
-6. Run backend server:
-   ```bash
-   uvicorn app.main:app --reload --port 8000
-   ```
-
-   Backend runs at: `http://localhost:8000`
-   - API docs: `http://localhost:8000/docs`
-   - Health check: `http://localhost:8000/health`
-
-### Frontend Setup
-
-1. Navigate to frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create `.env` file in `frontend/` (if needed):
-   ```env
-   VITE_GEMINI_API_KEY=your_api_key_here
-   ```
-
-4. Run development server:
-   ```bash
-   npm run dev
-   ```
-
-   Frontend runs at: `http://localhost:3000`
-
-## Development Workflow
-
-### Run Both Services
-
-**Terminal 1 - Backend:**
+### 1. Backend Setup
 ```bash
 cd backend
-# Activate venv if using one
-uvicorn app.main:app --reload --port 8000
+python -m venv venv
+# Windows
+.\venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+# Create .env file
+echo "GEMINI_API_KEY=your_key_here" > .env
+echo "DATA_STREAM_PATH=data/stream.jsonl" >> .env
+
+# Run Server
+python -m uvicorn app.main:app --reload
 ```
 
-**Terminal 2 - Frontend:**
+### 2. Frontend Setup
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-### Verify Setup
-
-1. Check backend health:
-   ```bash
-   curl http://localhost:8000/health
-   ```
-
-2. Open browser:
-   - Frontend: http://localhost:3000
-   - Backend API docs: http://localhost:8000/docs
-
-## API Endpoints
-
-- `GET /` - Welcome message
-- `GET /health` - Health check
-- `GET /docs` - Interactive API documentation (Swagger)
-- `GET /redoc` - Alternative API documentation
-
-## Configuration
-
-### Backend Port
-Default: `8000`
-Change in run command: `--port <port_number>`
-
-### Frontend Port
-Default: `3000`
-Configured in `frontend/vite.config.ts`
-
-### CORS
-Backend CORS is configured for:
-- `http://localhost:5173`
-- `http://127.0.0.1:5173`
-
-## Troubleshooting
-
-**Backend won't start:**
-- Ensure virtual environment is activated
-- Check Python version: `python --version` (need 3.10+)
-- Verify dependencies: `pip list`
-
-**Frontend won't start:**
-- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-- Check Node version: `node --version` (need 18+)
-
-**CORS errors:**
-- Verify backend CORS origins match frontend URL
-- Check both services are running
-
-**Port already in use:**
-- Backend: Change port with `--port <port>` flag
-- Frontend: Vite will auto-select next available port
-
-## Production Build
-
-**Frontend:**
+### 3. Configure Sources (Optional)
+To enable live data fetching from Perplexity or X, update your `.env` file:
 ```bash
-cd frontend
-npm run build
+PERPLEXITY_ENABLED=True
+PERPLEXITY_API_KEY=your_key
+X_ENABLED=True
+X_BEARER_TOKEN=your_token
 ```
+*Note: Without keys, the system automatically falls back to simulated data for reliable demos.*
 
-**Backend:**
-```bash
-cd backend
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+Access the dashboard at `http://localhost:5173`.
+
+---
+
+## 🎮 Demo Instructions
+
+### 1. Inject a Signal
+Simulate a breaking market event:
+1. Click the **Inject_Signal** button (top right).
+2. Enter details:
+   - **Title**: "TSMC 2nm Yields Hit 80%"
+   - **Source**: "Supply Chain Leak"
+   - **Content**: "Internal reports confirm N2 process is ahead of schedule."
+3. Click **Transmit**. Watch the **Live Ticker** update instantly!
+
+### 2. Query the Intelligence Engine
+Ask a strategic question:
+1. Type: *"What is the status of 2nm production?"*
+2. The system will:
+   - Retrieve the signal you just injected.
+   - Format it into a context block.
+   - Generate a **Strategic Insight** using Gemini.
+3. Review the "Strategic Insight" and the supporting "Evidence" below it.
+
+---
+
+## 🔌 API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/inject` | Push a new event into the data stream. |
+| `POST` | `/api/query` | Retrieve top-k relevant events for a query. |
+| `POST` | `/api/generate` | Generate an AI insight based on context. |
+| `GET` | `/api/signals` | Get the latest 10 raw signals. |
+| `GET` | `/api/radar` | Get aggregated activity stats per company. |
+
+---
+
+## 💡 Why Pathway Matters
+
+In high-frequency markets like semiconductors, **static databases are liabilities**. 
+
+SiliconPulse is built on the philosophy of **Reactive Data Processing** (championed by Pathway):
+1.  **Zero Latency**: Insights are updated the moment data arrives, not when a batch job runs.
+2.  **Consistency**: The "Live Ticker" and "RAG Context" are always in sync.
+3.  **Scalability**: Stream processing handles infinite data velocity better than traditional CRUD apps.
+
+*Note: This demo uses a file-based stream to simulate the Pathway experience for hackathon portability.*
+
+---
+
+## 🔮 Future Work
+
+- **Real Pathway Integration**: Replace file I/O with `pathway` for true enterprise-grade streaming.
+- **Multi-Modal Ingestion**: Ingest PDF reports and earnings call audio.
+- **Graph RAG**: Map supply chain dependencies (e.g., ASML -> TSMC -> NVIDIA).
