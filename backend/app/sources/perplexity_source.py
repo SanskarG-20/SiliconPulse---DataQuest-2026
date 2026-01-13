@@ -18,8 +18,9 @@ def pull_perplexity_signals(queries: list[str] = None, max_results: int = 10) ->
     for company, data in COMPANY_DICT.items():
         queries.append(f"Latest strategic updates for {company}")
         queries.append(f"{company} semiconductor supply chain developments")
-        queries.append(f"New contracts, acquisitions, product launches for {company}")
-        
+        for topic in data.get("topics", []):
+            queries.append(f"Latest news about {company} {topic}")
+            
     # Deduplicate queries
     queries = list(set(queries))
     # Limit to reasonable number to avoid spamming API if we were live

@@ -186,23 +186,22 @@ def safe_read_jsonl(path: Path, limit: int = 200, freshness_hours: Optional[int]
         # But usually for display we want newest first. 
         # The original function returned chronological (append order).
         # Let's keep original behavior: return chronological order.
-        return list(reversed(events))
-            
+        return events
     except Exception as e:
         logger.error(f"Error reading JSONL: {e}")
         return []
 
 def compute_signal_strength(evidence: list) -> int:
-    """Compute signal strength based on evidence count and quality."""
+    """
+    Compute signal strength (0-100) based on evidence count and recency.
+    """
     if not evidence:
         return 0
     
-    # Base score on count (max 50)
-    count_score = min(len(evidence) * 10, 50)
+    base_score = min(len(evidence) * 15, 60) # Max 60 from count
     
-    # Recency bonus (max 50)
-    # Calculate average recency score of evidence
-    total_recency = sum(compute_recency_boost(item.timestamp) for item in evidence)
-    avg_recency = total_recency / len(evidence) if evidence else 0
+    # Recency bonus
+    recent_count = sum(1 for e in evidence if "hours ago" in str(e.timestamp) or "minutes ago" in str(e.timestamp))
+    recency_score = min(recent_count * 10, 40) # Max 40 from recency
     
-    return int(min(count_score + avg_recency, 100))
+    return min(base_score + recency_score, 100)

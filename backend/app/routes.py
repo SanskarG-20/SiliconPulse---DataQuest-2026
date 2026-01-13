@@ -13,7 +13,11 @@ from app.models import (
 from app.settings import settings
 from app.sources.perplexity_source import pull_perplexity_signals
 from app.sources.x_source import pull_x_signals
-from app.utils import safe_read_jsonl, compute_signal_strength, now_ts, compute_event_id, compute_recency_boost, normalize_text, deduplicate_and_append
+from app.utils import (
+    safe_read_jsonl, compute_signal_strength, now_ts, compute_event_id, 
+    compute_recency_boost, normalize_text, deduplicate_and_append,
+    format_error_response
+)
 from app.services.gemini_client import gemini_client
 from app.demo_generator import DemoGenerator
 from app import storage
@@ -68,7 +72,17 @@ async def get_signals():
             limit=20, # Top 20
             freshness_hours=settings.freshness_hours
         )
-        return events
+        
+        # Deduplicate
+        seen = set()
+        unique_events = []
+        for event in events:
+            key = (event.get("title"), event.get("source"))
+            if key not in seen:
+                seen.add(key)
+                unique_events.append(event)
+                
+        return unique_events
     except Exception as e:
         print(f"Signals Error: {e}")
         return []
@@ -97,6 +111,10 @@ async def inject_signal(request: InjectRequest):
             "timestamp": injected_at,
             "source": request.source
         }
+        
+        # Compute ID
+        event_id = compute_event_id(data_entry)
+        
         # Append as JSON line to the file
         data_path = settings.resolved_data_path
         with open(data_path, "a", encoding="utf-8") as f:
@@ -222,18 +240,40 @@ async def process_query(request: QueryRequest):
             if match_count > 0:
                 matched_events.append(event)
         
+        # Deduplicate matched events
+        seen = set()
+        unique_matched = []
+        for event in matched_events:
+            key = (event.get("title"), event.get("source"))
+            if key not in seen:
+                seen.add(key)
+                unique_matched.append(event)
+        matched_events = unique_matched
+        
         # Convert to EvidenceItem objects
         evidence_list = []
         for event in matched_events:
+            # Generate snippet
+            # Priority 1: Use existing snippet from event (e.g. from DemoGenerator)
+            snippet = event.get("snippet", "")
+            
+            # Priority 2: Generate from content if snippet is missing/empty
+            if not snippet or len(snippet) < 10:
+                content = event.get("content", "")
+                if content and len(content) > 20:
+                    snippet = content[:200] + "..."
+                else:
+                    # Fallback to title
+                    snippet = event.get("title", "")
+
             evidence_list.append(EvidenceItem(
-                event_id=event.get("event_id", compute_event_id(event)),
-                title=event.get("title", ""),
-                snippet=event.get("snippet") or event.get("content", "")[:160],
+                title=event.get("title", "Untitled"),
+                snippet=snippet,
                 source=event.get("source", "Unknown"),
                 timestamp=event.get("timestamp", ""),
                 url=event.get("url", ""),
                 company=event.get("company"),
-                event_type=event.get("event_type")
+                event_type=event.get("event_type", "general")
             ))
             
         # Sort by timestamp (newest first)
@@ -662,47 +702,6 @@ async def verify_sources(query: str):
             for kw in raw_keywords:
                 if kw in aliases:
                     is_relevant = True
-                    break
-            if is_relevant:
-                query_keywords.update(aliases)
-        
-        query_keywords = list(query_keywords)
-        
-        matched_events = []
-        for event in events:
-            title = event.get("title", "").lower()
-            content = event.get("content", "").lower()
-            company = event.get("company", "").lower() if event.get("company") else ""
-            
-            match_count = 0
-            for keyword in query_keywords:
-                if keyword in title or keyword in content or keyword in company:
-                    match_count += 1
-            
-            if match_count > 0:
-                matched_events.append(event)
-        
-        # Sort by timestamp
-        matched_events.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
-        matched_events = matched_events[:10] # Top 10 for verification
-        
-        # 3. Construct verification response
-        verified_sources = []
-        for event in matched_events:
-            source = event.get("source", "Unknown")
-            trust_level = "Low"
-            reason = "Unknown source origin"
-            
-            if source in ["Reuters", "Bloomberg", "Financial Times", "TechCrunch", "Official"]:
-                trust_level = "High"
-                reason = "Established financial/tech news outlet"
-            elif source in ["Perplexity", "MarketWire"]:
-                trust_level = "Medium"
-                reason = "Aggregated intelligence"
-            elif source == "ManualInject":
-                trust_level = "Medium"
-                reason = "Manually verified injection"
-            elif source == "X" or source == "Twitter":
                 trust_level = "Low"
                 reason = "Social media signal (unverified)"
                 

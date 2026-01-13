@@ -657,9 +657,11 @@ const App: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-slate-400 leading-relaxed pl-12 border-l-2 border-slate-800 group-hover:border-sky-500/30 transition-colors">
-                          {item.snippet}
-                        </p>
+                        {item.snippet && item.snippet !== "..." && item.snippet.length >= 20 && (
+                          <p className="text-sm text-slate-400 leading-relaxed pl-12 border-l-2 border-slate-800 group-hover:border-sky-500/30 transition-colors">
+                            {item.snippet}
+                          </p>
+                        )}
                       </div>
                     ))
                   )}
