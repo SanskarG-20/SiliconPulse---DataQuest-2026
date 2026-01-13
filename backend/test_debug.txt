@@ -1,0 +1,132 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-8.4.2, pluggy-1.6.0 -- C:\Users\ANAND SITARAM GOTAD\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ANAND SITARAM GOTAD\Downloads\DATAQUEST\backend
+plugins: anyio-4.11.0, langsmith-0.4.32
+collecting ... collected 4 items
+
+test_dedup_freshness.py::test_deduplication_logic PASSED                 [ 25%]
+test_dedup_freshness.py::test_deduplication_logic ERROR                  [ 25%]
+test_dedup_freshness.py::test_freshness_filtering ERROR                  [ 50%]
+test_dedup_freshness.py::test_recency_boosting ERROR                     [ 75%]
+test_dedup_freshness.py::test_checkpointing ERROR                        [100%]
+
+=================================== ERRORS ====================================
+________________ ERROR at teardown of test_deduplication_logic ________________
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown():
+        # Setup
+        settings.db_path = TEST_DB_PATH
+        settings.data_stream_path = TEST_STREAM_PATH
+        settings.dedup_enabled = True
+        settings.checkpoint_enabled = True
+    
+        # Remove existing test files
+        if os.path.exists(TEST_DB_PATH):
+            os.remove(TEST_DB_PATH)
+        if os.path.exists(TEST_STREAM_PATH):
+            os.remove(TEST_STREAM_PATH)
+    
+        # Initialize DB
+        storage.local_storage = threading.local() # Correctly reset thread local
+        storage.init_db()
+    
+        yield
+    
+        # Teardown
+        if os.path.exists(TEST_DB_PATH):
+>           os.remove(TEST_DB_PATH)
+E           PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'data/test_siliconpulse.db'
+
+test_dedup_freshness.py:45: PermissionError
+_________________ ERROR at setup of test_freshness_filtering __________________
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown():
+        # Setup
+        settings.db_path = TEST_DB_PATH
+        settings.data_stream_path = TEST_STREAM_PATH
+        settings.dedup_enabled = True
+        settings.checkpoint_enabled = True
+    
+        # Remove existing test files
+        if os.path.exists(TEST_DB_PATH):
+>           os.remove(TEST_DB_PATH)
+E           PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'data/test_siliconpulse.db'
+
+test_dedup_freshness.py:33: PermissionError
+___________________ ERROR at setup of test_recency_boosting ___________________
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown():
+        # Setup
+        settings.db_path = TEST_DB_PATH
+        settings.data_stream_path = TEST_STREAM_PATH
+        settings.dedup_enabled = True
+        settings.checkpoint_enabled = True
+    
+        # Remove existing test files
+        if os.path.exists(TEST_DB_PATH):
+>           os.remove(TEST_DB_PATH)
+E           PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'data/test_siliconpulse.db'
+
+test_dedup_freshness.py:33: PermissionError
+____________________ ERROR at setup of test_checkpointing _____________________
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown():
+        # Setup
+        settings.db_path = TEST_DB_PATH
+        settings.data_stream_path = TEST_STREAM_PATH
+        settings.dedup_enabled = True
+        settings.checkpoint_enabled = True
+    
+        # Remove existing test files
+        if os.path.exists(TEST_DB_PATH):
+>           os.remove(TEST_DB_PATH)
+E           PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'data/test_siliconpulse.db'
+
+test_dedup_freshness.py:33: PermissionError
+============================== warnings summary ===============================
+..\..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\starlette\formparsers.py:12
+  C:\Users\ANAND SITARAM GOTAD\AppData\Local\Programs\Python\Python313\Lib\site-packages\starlette\formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    import multipart
+
+..\..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic\_internal\_config.py:291
+  C:\Users\ANAND SITARAM GOTAD\AppData\Local\Programs\Python\Python313\Lib\site-packages\pydantic\_internal\_config.py:291: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.9/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+app\main.py:69
+  C:\Users\ANAND SITARAM GOTAD\Downloads\DATAQUEST\backend\app\main.py:69: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+..\..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\fastapi\applications.py:4495
+  C:\Users\ANAND SITARAM GOTAD\AppData\Local\Programs\Python\Python313\Lib\site-packages\fastapi\applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+test_dedup_freshness.py::test_deduplication_logic
+  C:\Users\ANAND SITARAM GOTAD\Downloads\DATAQUEST\backend\test_dedup_freshness.py:55: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat()
+
+test_dedup_freshness.py::test_deduplication_logic
+  C:\Users\ANAND SITARAM GOTAD\Downloads\DATAQUEST\backend\app\storage.py:84: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR test_dedup_freshness.py::test_deduplication_logic - PermissionError: [W...
+ERROR test_dedup_freshness.py::test_freshness_filtering - PermissionError: [W...
+ERROR test_dedup_freshness.py::test_recency_boosting - PermissionError: [WinE...
+ERROR test_dedup_freshness.py::test_checkpointing - PermissionError: [WinErro...
+=================== 1 passed, 6 warnings, 4 errors in 3.78s ===================

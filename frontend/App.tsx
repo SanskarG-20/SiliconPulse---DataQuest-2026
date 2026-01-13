@@ -7,7 +7,8 @@ import {
 import { LiveTicker } from './components/LiveTicker';
 import { CompanyRadar } from './components/CompanyRadar';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
-import { querySiliconPulse, injectSignal, fetchSignals, QueryResponse, formatEvidenceToContext, generateInsight } from './api/siliconpulseApi';
+import { StrategicInsightReport } from './components/StrategicInsightReport';
+import { querySiliconPulse, injectSignal, fetchSignals, QueryResponse, formatEvidenceToContext, generateInsight, bootstrapSystem, fetchRecommendations, exportAnalysis, verifySources } from './api/siliconpulseApi';
 import { INITIAL_LIVE_FEED } from './constants';
 import { LiveEvent } from './types';
 
@@ -19,6 +20,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState(new Date().toLocaleTimeString());
+  const [recommendations, setRecommendations] = useState<any[]>([]);
 
   // Injection Modal State
   const [showInjectModal, setShowInjectModal] = useState(false);
@@ -28,11 +30,34 @@ const App: React.FC = () => {
   const [injectLoading, setInjectLoading] = useState(false);
   const [injectSuccess, setInjectSuccess] = useState(false);
 
+  // Export & Verify State
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [exportFormat, setExportFormat] = useState('md');
+  const [verifiedSources, setVerifiedSources] = useState<any[]>([]);
+  const [verifying, setVerifying] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('✅ SiliconPulse App Loaded - Ready for queries');
-    refreshSignals();
+    console.log('✅ SiliconPulse App Loaded - Bootstrapping...');
+
+    const init = async () => {
+      // 1. Bootstrap System (Generate Fresh News)
+      await bootstrapSystem();
+
+      // 2. Refresh Signals
+      refreshSignals();
+
+      // 3. Fetch Recommendations
+      fetchRecommendations().then(recs => {
+        if (recs && recs.length > 0) {
+          setRecommendations(recs);
+        }
+      });
+    };
+
+    init();
 
     // Auto-refresh signals every 5 seconds
     const interval = setInterval(refreshSignals, 5000);
@@ -82,15 +107,23 @@ const App: React.FC = () => {
     setInsight(null);
 
     try {
-      // 1. Get Evidence
+      // 1. Get Evidence FIRST - show immediately
       const result = await querySiliconPulse(finalQuery);
       setQueryResult(result);
+      setLoading(false); // Stop loading spinner immediately after evidence is shown
 
-      // 2. Format Context & Generate Insight
+      // 2. Generate Insight ASYNCHRONOUSLY in background
       if (result.evidence.length > 0) {
+        // Don't await - let it load in background
         const context = formatEvidenceToContext(result.evidence);
-        const generatedInsight = await generateInsight(finalQuery, context);
-        setInsight(generatedInsight);
+        generateInsight(finalQuery, context)
+          .then(generatedInsight => {
+            setInsight(generatedInsight);
+          })
+          .catch(err => {
+            console.error("Insight generation failed:", err);
+            setInsight("Insight generation unavailable. Evidence displayed above.");
+          });
       } else {
         setInsight("No sufficient evidence found in the data stream to generate a specific insight.");
       }
@@ -99,7 +132,6 @@ const App: React.FC = () => {
       setLastUpdate(new Date().toLocaleTimeString());
     } catch (err: any) {
       setError(err.message || 'Intelligence failure. Connection to core reasoning lost.');
-    } finally {
       setLoading(false);
     }
   };
@@ -129,6 +161,36 @@ const App: React.FC = () => {
       // Could set an error state for the modal here
     } finally {
       setInjectLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    if (!queryResult || !insight) return;
+    try {
+      await exportAnalysis(
+        queryResult.query,
+        insight,
+        queryResult.evidence,
+        exportFormat
+      );
+      setShowExportModal(false);
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Export failed. See console for details.");
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!queryResult) return;
+    setVerifying(true);
+    setShowVerifyModal(true);
+    try {
+      const data = await verifySources(queryResult.query);
+      setVerifiedSources(data.sources);
+    } catch (err) {
+      console.error("Verification failed:", err);
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -214,6 +276,91 @@ const App: React.FC = () => {
                         <Zap size={14} />
                         <span>Transmit Signal</span>
                       </>
+                    )}
+
+                    {/* EXPORT MODAL */}
+                    {showExportModal && (
+                      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                        <div className="w-full max-w-md bg-[#020617] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative">
+                          <button onClick={() => setShowExportModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
+                          <div className="p-6 border-b border-slate-800/50">
+                            <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
+                              <BarChart3 size={20} className="mr-2 text-sky-500" /> Export Analysis
+                            </h3>
+                          </div>
+                          <div className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                              {['md', 'json', 'txt', 'pdf'].map(fmt => (
+                                <button
+                                  key={fmt}
+                                  onClick={() => setExportFormat(fmt)}
+                                  className={`p-3 rounded-lg border text-sm font-bold uppercase tracking-widest transition-all ${exportFormat === fmt
+                                    ? 'bg-sky-500/20 border-sky-500 text-sky-400'
+                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'
+                                    }`}
+                                >
+                                  .{fmt}
+                                </button>
+                              ))}
+                            </div>
+                            <button
+                              onClick={handleExport}
+                              className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)] mt-4"
+                            >
+                              Download Report
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* VERIFY SOURCES MODAL */}
+                    {showVerifyModal && (
+                      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                        <div className="w-full max-w-2xl bg-[#020617] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[80vh]">
+                          <button onClick={() => setShowVerifyModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
+                          <div className="p-6 border-b border-slate-800/50 shrink-0">
+                            <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
+                              <HelpCircle size={20} className="mr-2 text-emerald-500" /> Source Verification
+                            </h3>
+                          </div>
+                          <div className="p-6 overflow-y-auto custom-scrollbar">
+                            {verifying ? (
+                              <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                                <RefreshCw size={32} className="animate-spin text-emerald-500" />
+                                <span className="text-sm font-mono text-slate-400 uppercase tracking-widest">Verifying Source Integrity...</span>
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {verifiedSources.map((src, idx) => (
+                                  <div key={idx} className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 flex items-start justify-between">
+                                    <div className="flex-1 pr-4">
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${src.trust_level === 'High' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                          src.trust_level === 'Medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                            'bg-red-500/10 text-red-500 border-red-500/20'
+                                          }`}>
+                                          {src.trust_level} Trust
+                                        </span>
+                                        <span className="text-[10px] font-bold text-slate-500">{src.source}</span>
+                                        <span className="text-[10px] text-slate-600">•</span>
+                                        <span className="text-[10px] text-slate-600">{new Date(src.timestamp).toLocaleString()}</span>
+                                      </div>
+                                      <h4 className="text-sm font-bold text-slate-200 mb-1">{src.title}</h4>
+                                      <p className="text-xs text-slate-500 italic">{src.reason}</p>
+                                    </div>
+                                    {src.url && (
+                                      <a href={src.url} target="_blank" rel="noreferrer" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                                        <ExternalLink size={16} />
+                                      </a>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </button>
                 </div>
@@ -328,26 +475,42 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
+                  {(recommendations.length > 0 ? recommendations : [
                     { label: "NVIDIA-TSMC Pipeline", query: "Any new NVIDIA-TSMC contract today?", icon: Zap, color: "text-amber-400" },
                     { label: "Foundry Design Wins", query: "Status of Intel 18A design wins and foundry clients?", icon: CheckCircle2, color: "text-emerald-400" },
                     { label: "AI Infra Analysis", query: "What is the impact of Meta's new AI infra updates?", icon: Cpu, color: "text-sky-400" },
-                    { label: "High Impact Summary", query: "What are the top 3 high-impact events in last 2 hours?", icon: AlertCircle, color: "text-red-400" }
-                  ].map(item => (
-                    <button
-                      key={item.label}
-                      onClick={() => handleSubmit(item.query)}
-                      className="glass glass-hover p-5 text-left rounded-2xl transition-all flex items-start space-x-4 group"
-                    >
-                      <div className={`p-3 bg-slate-900 rounded-xl group-hover:bg-slate-800 transition-colors ${item.color}`}>
-                        <item.icon size={20} />
-                      </div>
-                      <div className="flex-1">
-                        <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-500 mb-1 block group-hover:text-slate-300 transition-colors">{item.label}</span>
-                        <p className="text-sm font-medium text-slate-300 group-hover:text-white leading-tight">{item.query}</p>
-                      </div>
-                    </button>
-                  ))}
+                    { label: "High Impact Summary", "query": "What are the top 3 high-impact events in last 2 hours?", icon: AlertCircle, color: "text-red-400" }
+                  ]).map((item: any) => {
+                    // Map string icon names to components if needed, or use defaults
+                    const IconComponent = typeof item.icon === 'string'
+                      ? (item.icon === 'Activity' ? Activity :
+                        item.icon === 'Cpu' ? Cpu :
+                          item.icon === 'Globe' ? ExternalLink :
+                            item.icon === 'TrendingUp' ? TrendingUp :
+                              item.icon === 'Zap' ? Zap :
+                                item.icon === 'ShieldAlert' ? ShieldAlert :
+                                  item.icon === 'BarChart3' ? BarChart3 :
+                                    item.icon === 'Layers' ? Layers :
+                                      item.icon === 'FileText' ? FileText :
+                                        AlertCircle)
+                      : item.icon;
+
+                    return (
+                      <button
+                        key={item.label}
+                        onClick={() => handleSubmit(item.query)}
+                        className="glass glass-hover p-5 text-left rounded-2xl transition-all flex items-start space-x-4 group"
+                      >
+                        <div className={`p-3 bg-slate-900 rounded-xl group-hover:bg-slate-800 transition-colors ${item.color}`}>
+                          <IconComponent size={20} />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-500 mb-1 block group-hover:text-slate-300 transition-colors">{item.label}</span>
+                          <p className="text-sm font-medium text-slate-300 group-hover:text-white leading-tight">{item.query}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -361,12 +524,37 @@ const App: React.FC = () => {
                     <div className="flex-1">
                       <h3 className="text-xl font-black text-red-500 uppercase tracking-tight mb-2">Intelligence Synthesis Failed</h3>
                       <p className="text-slate-300 font-medium mb-4">{error}</p>
-                      <button
-                        onClick={() => setError(null)}
-                        className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-black uppercase tracking-widest transition-all border border-red-500/30"
-                      >
-                        Dismiss & Retry
-                      </button>
+
+                      {error.includes("Backend offline") ? (
+                        <button
+                          onClick={async () => {
+                            setError(null);
+                            setLoading(true);
+                            // Import dynamically to avoid circular dependency issues if any
+                            const { checkBackendHealth } = await import('./api/siliconpulseApi');
+                            const isOnline = await checkBackendHealth();
+                            if (isOnline) {
+                              setLoading(false);
+                              // Retry the query if it was a query failure
+                              if (query) handleSubmit(query);
+                            } else {
+                              setLoading(false);
+                              setError("Backend still offline. Please ensure server is running on port 8000.");
+                            }
+                          }}
+                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-black uppercase tracking-widest transition-all border border-red-500/30 flex items-center space-x-2"
+                        >
+                          <RefreshCw size={12} />
+                          <span>Check Connection & Retry</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setError(null)}
+                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-xs font-black uppercase tracking-widest transition-all border border-red-500/30"
+                        >
+                          Dismiss
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -418,7 +606,7 @@ const App: React.FC = () => {
                 </div>
 
                 {/* INSIGHT SECTION */}
-                {insight && (
+                {queryResult && queryResult.evidence.length > 0 && (
                   <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center space-x-2 mb-4">
                       <div className="p-1.5 bg-indigo-500/20 rounded-lg">
@@ -426,9 +614,16 @@ const App: React.FC = () => {
                       </div>
                       <h3 className="text-sm font-black text-indigo-400 uppercase tracking-widest">Strategic Insight</h3>
                     </div>
-                    <div className="prose prose-invert prose-sm max-w-none text-slate-300">
-                      <MarkdownRenderer content={insight} />
-                    </div>
+                    {insight ? (
+                      <div className="max-w-none">
+                        <StrategicInsightReport data={insight} />
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-3 text-slate-400">
+                        <RefreshCw size={16} className="animate-spin" />
+                        <span className="text-sm font-medium">Generating strategic insight...</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -472,11 +667,17 @@ const App: React.FC = () => {
 
                 <div className="mt-16 flex items-center justify-between p-6 glass rounded-2xl border-slate-800/40">
                   <div className="flex space-x-3">
-                    <button className="flex items-center space-x-2 px-4 py-2 bg-sky-500 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-sky-400 transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+                    <button
+                      onClick={() => setShowExportModal(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-sky-500 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-sky-400 transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)]"
+                    >
                       <BarChart3 size={14} />
                       <span>Export Analysis</span>
                     </button>
-                    <button className="flex items-center space-x-2 px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all">
+                    <button
+                      onClick={handleVerify}
+                      className="flex items-center space-x-2 px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-700 transition-all"
+                    >
                       <HelpCircle size={14} />
                       <span>Verify Sources</span>
                     </button>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SiliconPulse Connection Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 40px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #38bdf8;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #059669;
+            color: white;
+        }
+
+        .error {
+            background: #dc2626;
+            color: white;
+        }
+
+        button {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0284c7;
+        }
+
+        pre {
+            background: #020617;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🔌 Connection Diagnostic</h1>
+        <p>Testing connection to <strong>http://127.0.0.1:8000</strong>...</p>
+
+        <button onclick="testConnection()">Test Connection Now</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+
+            try {
+                // 1. Test Health
+                const t0 = performance.now();
+                const healthRes = await fetch('http://127.0.0.1:8000/health');
+                const t1 = performance.now();
+
+                if (!healthRes.ok) throw new Error(`Health check failed: ${healthRes.status}`);
+                const healthData = await healthRes.json();
+
+                // 2. Test Query (POST)
+                const queryRes = await fetch('http://127.0.0.1:8000/api/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: "test", k: 1 })
+                });
+
+                if (!queryRes.ok) throw new Error(`Query failed: ${queryRes.status}`);
+                const queryData = await queryRes.json();
+
+                resultDiv.innerHTML = `
+                    <div class="status success">✅ CONNECTION SUCCESSFUL</div>
+                    <p><strong>Latency:</strong> ${(t1 - t0).toFixed(1)}ms</p>
+                    <p><strong>Health Response:</strong></p>
+                    <pre>${JSON.stringify(healthData, null, 2)}</pre>
+                    <p><strong>Query Response:</strong></p>
+                    <pre>${JSON.stringify(queryData, null, 2)}</pre>
+                    <p><strong>CORS Check:</strong> Passed</p>
+                `;
+            } catch (e) {
+                resultDiv.innerHTML = `
+                    <div class="status error">❌ CONNECTION FAILED</div>
+                    <p><strong>Error:</strong> ${e.message}</p>
+                    <p><strong>Troubleshooting:</strong></p>
+                    <ul>
+                        <li>Ensure backend is running: <code>py -m uvicorn app.main:app --reload --port 8000</code></li>
+                        <li>Check if port 8000 is blocked by firewall</li>
+                        <li>Check console logs for CORS errors</li>
+                    </ul>
+                `;
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+
+</html>

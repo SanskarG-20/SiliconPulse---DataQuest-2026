@@ -16,6 +16,8 @@ class EvidenceItem(BaseModel):
     snippet: str = Field(..., description="Content snippet or description")
     company: Optional[str] = Field(None, description="Related company name")
     event_type: Optional[str] = Field(None, description="Type of event")
+    url: Optional[str] = Field(None, description="URL of the event")
+    event_id: Optional[str] = Field(None, description="Unique event ID")
 
 
 class QueryResponse(BaseModel):
@@ -24,13 +26,16 @@ class QueryResponse(BaseModel):
     evidence: list[EvidenceItem] = Field(..., description="List of evidence items")
     signal_strength: int = Field(..., description="Strength of the signal (0-100)")
     last_updated: str = Field(..., description="Timestamp of last update")
+    report: Optional[str] = Field(None, description="Generated intelligence report")
+    llm_status: Optional[str] = Field("pending", description="Status of LLM generation")
+    stream_path_used: Optional[str] = Field(None, description="Path of the stream file used")
 
 
 class InjectRequest(BaseModel):
     """Request model for manually injecting data into the stream"""
     title: str = Field(..., description="Title of the injected item")
     content: str = Field(..., description="Content of the injected item")
-    timestamp: Optional[str] = Field(None, description="Timestamp (auto-generated if not provided)")
+    timestamp: Optional[str] = Field(None, description="Timestamp of the event")
     source: str = Field(default="ManualInject", description="Source identifier")
 
 
@@ -38,6 +43,7 @@ class InjectResponse(BaseModel):
     """Response model for data injection"""
     status: str = Field(..., description="Status of the injection operation")
     injected_at: str = Field(..., description="Timestamp when the data was injected")
+    stream_path_used: Optional[str] = Field(None, description="Path of the stream file used")
 
 
 class SignalCompact(BaseModel):
@@ -65,3 +71,27 @@ class GenerateRequest(BaseModel):
 class GenerateResponse(BaseModel):
     """Response model for generated insights"""
     insight: str = Field(..., description="The generated insight from Gemini")
+
+
+class ExportRequest(BaseModel):
+    """Request model for exporting analysis"""
+    query: str = Field(..., description="The original query")
+    report: str = Field(..., description="The generated report content")
+    evidence: list[EvidenceItem] = Field(..., description="List of evidence items")
+    format: str = Field(..., description="Export format: md, json, txt, pdf")
+
+
+class SourceVerifyItem(BaseModel):
+    """Verification item for a source"""
+    timestamp: Optional[str] = Field(None, description="Timestamp of the event")
+    source: str = Field(..., description="Source name")
+    title: str = Field(..., description="Title/Headline")
+    url: Optional[str] = Field(None, description="URL if available")
+    trust_level: str = Field(..., description="High, Medium, or Low")
+    reason: str = Field(..., description="Reason for trust level")
+
+
+class SourceVerifyResponse(BaseModel):
+    """Response model for source verification"""
+    query: str = Field(..., description="The query being verified")
+    sources: list[SourceVerifyItem] = Field(..., description="List of verified sources")

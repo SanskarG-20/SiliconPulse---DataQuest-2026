@@ -1,0 +1,34 @@
+Starting SiliconPulse System Diagnostic...
+Target: http://127.0.0.1:8000
+File Check: data/stream.jsonl exists (38881 bytes)
+
+Testing Health Check [GET /health]...
+[PASS] Health Check returned 200
+
+--- Bootstrapping Data ---
+
+Testing Bootstrap System [POST /api/bootstrap]...
+[PASS] Bootstrap System returned 200
+
+--- DEBUG: Testing File Reading Logic Locally ---
+   Read 86 lines from file
+   Fresh Events Found (Local Logic): 86
+
+--- Verifying Data Availability ---
+
+Testing Fetch Signals [GET /api/signals]...
+[PASS] Fetch Signals returned 200
+   Signals Found: 20
+   First Signal: Micron delays German facility amid m&a rumors concerns
+
+Testing Fetch Radar [GET /api/radar]...
+[PASS] Fetch Radar returned 200
+   Radar Categories: 12
+
+--- Testing Query Engine ---
+
+Testing Query 'TSMC' [POST /api/query]...
+[PASS] Query 'TSMC' returned 200
+   Evidence Found: 0
+
+Diagnostic Complete.
