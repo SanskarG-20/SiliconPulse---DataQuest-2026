@@ -1,20 +1,52 @@
-# ⚡ SiliconPulse
+# ⚡ SiliconPulse (DataQuest 2026)
 
-**Live Strategic Intelligence for the Semiconductor Industry**
+> **Real-time Strategic Intelligence for the Semiconductor & AI Era.**  
+> *Powered by Gemini 1.5 Pro & Live Signal Processing.*
 
-SiliconPulse is a real-time RAG (Retrieval-Augmented Generation) engine designed to monitor, analyze, and predict market shifts in the semiconductor sector. By combining live data streams with Gemini's reasoning capabilities, it provides instant strategic insights for executives and analysts.
+![Status](https://img.shields.io/badge/Status-Hackathon_Live-success)
+![Tech](https://img.shields.io/badge/Stack-FastAPI_React_Gemini-blue)
+![Focus](https://img.shields.io/badge/Focus-Market_Intelligence-purple)
 
 ---
 
-## 🚀 What It Does
+## 📖 What is SiliconPulse?
+**SiliconPulse** is a real-time strategic intelligence engine designed to decode the chaotic semiconductor and AI market. It aggregates live signals (news, social, market data), grounds them in verified evidence, and uses **Google Gemini** to synthesize executive-level strategic insights instantly.
 
-- **Live Signal Ingestion**: Captures high-velocity market events (contracts, yields, launches) in real-time.
-- **Dynamic RAG**: Instantly retrieves the most relevant context for any query, ensuring answers are never stale.
-- **AI-Powered Insights**: Uses Google Gemini to synthesize scattered data points into executive-level briefings.
-- **Competitor Radar**: Tracks activity levels across key players (NVIDIA, TSMC, Apple) to spot emerging threats.
-- **Smart Recommendations**: Proactively suggests high-impact queries based on real-time market shifts.
-- **Source Verification**: Verifies the credibility of intelligence sources using cross-referencing.
-- **Exportable Intelligence**: Generates downloadable reports (PDF, Markdown, JSON) for offline analysis.
+Unlike static dashboards, SiliconPulse is **intent-aware**—it understands the strategic implications of a "TSMC yield drop" or an "NVIDIA Blackwell delay" and explains *why* it matters.
+
+---
+
+## 🎯 Problem Statement Fit (DataQuest 2026)
+**Challenge:** "Building Intelligent Systems for Real-time Decision Making."
+
+SiliconPulse addresses the **information overload** in the fast-moving tech sector.
+- **RAG / Live Intelligence:** We don't just search; we retrieve live events from a streaming pipeline and perform **Retrieval Augmented Generation (RAG)** to generate fresh insights.
+- **Dynamic Grounding:** Every AI claim is backed by specific, clickable evidence from the live feed.
+- **Controllable Demo:** The "Inject Signal" feature allows judges to simulate market-moving events (e.g., "China bans export of Gallium") and see the AI adapt instantly.
+
+---
+
+## 🚀 Key Features
+
+### 1. 📡 Live Pulse Feed
+A real-time ticker of market signals. It ingests data from simulated high-frequency sources (MarketWire, TechCrunch, X) and deduplicates it on the fly.
+
+### 2. 🧠 Strategic Insight Engine
+Powered by **Gemini**, this engine takes raw signals and generates a structured report:
+- **What Changed:** Immediate market shifts.
+- **Impact Reasoning:** Second-order effects (e.g., how Intel's loss affects AMD).
+- **Confidence Meter:** AI self-assessment of data reliability.
+
+### 3. 🎯 Company Radar
+Visual tracking of activity levels for top tech giants (NVIDIA, TSMC, Apple, etc.). Instantly spot who is making waves.
+
+### 4. 💉 Inject Signal (Demo Mode)
+**Judge Favorite:** Manually inject a custom news event into the live stream to test the system's reactivity.
+*Example: Inject "TSMC announces breakthrough 1nm process" and watch the Insight Engine update its analysis.*
+
+### 5. ✅ Verify Sources & Export
+- **Source Verification:** Assigns trust levels to data sources (e.g., "High" for Official Press Release, "Low" for Unverified Social).
+- **Export Analysis:** Download reports in Markdown, JSON, or Text for offline sharing.
 
 ---
 
