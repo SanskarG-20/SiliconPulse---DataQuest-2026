@@ -3,7 +3,7 @@
 > **Real-time Strategic Intelligence for the Semiconductor & AI Era.**  
 > *Powered by Gemini 1.5 Pro & Live Signal Processing.*
 
-![Status](https://img.shields.io/badge/Status-Hackathon_Live-success)
+![Status](https://img.shields.io/badge/Status-Hackathon_Submission-success)
 ![Tech](https://img.shields.io/badge/Stack-FastAPI_React_Gemini-blue)
 ![Focus](https://img.shields.io/badge/Focus-Market_Intelligence-purple)
 
@@ -12,51 +12,57 @@
 ## 📖 What is SiliconPulse?
 **SiliconPulse** is a real-time strategic intelligence engine designed to decode the chaotic semiconductor and AI market. It aggregates live signals (news, social, market data), grounds them in verified evidence, and uses **Google Gemini** to synthesize executive-level strategic insights instantly.
 
-Unlike static dashboards, SiliconPulse is **intent-aware**—it understands the strategic implications of a "TSMC yield drop" or an "NVIDIA Blackwell delay" and explains *why* it matters.
+Unlike static dashboards, SiliconPulse is **reactive and intent-aware**—it understands the strategic implications of a "TSMC yield drop" or an "NVIDIA Blackwell delay" and explains *why* it matters, backed by a dynamic confidence assessment.
 
 ---
 
 ## 🎯 Problem Statement Fit (DataQuest 2026)
 **Challenge:** "Building Intelligent Systems for Real-time Decision Making."
 
-SiliconPulse addresses the **information overload** in the fast-moving tech sector.
+SiliconPulse addresses the **information overload** in the fast-moving tech sector by implementing:
 - **RAG / Live Intelligence:** We don't just search; we retrieve live events from a streaming pipeline and perform **Retrieval Augmented Generation (RAG)** to generate fresh insights.
 - **Dynamic Grounding:** Every AI claim is backed by specific, clickable evidence from the live feed.
-- **Controllable Demo:** The "Inject Signal" feature allows judges to simulate market-moving events (e.g., "China bans export of Gallium") and see the AI adapt instantly.
+- **Real-time Reasoning:** The system adapts its analysis the moment a new signal is injected, providing up-to-the-minute strategic outlooks.
+- **System Design:** A robust decoupled architecture with a FastAPI gateway, background schedulers, and a high-performance React frontend.
 
 ---
 
 ## 🚀 Key Features
 
 ### 1. 📡 Live Pulse Feed
-A real-time ticker of market signals. It ingests data from simulated high-frequency sources (MarketWire, TechCrunch, X) and deduplicates it on the fly.
+A real-time ticker of market signals. It ingests data from simulated and live sources (Perplexity, X) and deduplicates it on the fly with a 12-hour freshness window.
 
 ### 2. 🧠 Strategic Insight Engine
 Powered by **Gemini**, this engine takes raw signals and generates a structured report:
 - **What Changed:** Immediate market shifts.
 - **Impact Reasoning:** Second-order effects (e.g., how Intel's loss affects AMD).
-- **Confidence Meter:** AI self-assessment of data reliability.
+- **Confidence Meter:** A dynamic assessment of data reliability based on evidence count, recency, and source trust.
 
 ### 3. 🎯 Company Radar
-Visual tracking of activity levels for top tech giants (NVIDIA, TSMC, Apple, etc.). Instantly spot who is making waves.
+Visual tracking of activity levels for top tech giants (NVIDIA, TSMC, Apple, etc.). Instantly spot who is making waves in the current data stream.
 
 ### 4. 💉 Inject Signal (Demo Mode)
-**Judge Favorite:** Manually inject a custom news event into the live stream to test the system's reactivity.
-*Example: Inject "TSMC announces breakthrough 1nm process" and watch the Insight Engine update its analysis.*
+**Judge Favorite:** Manually inject a custom news event into the live stream to test the system's reactivity. Watch the AI adapt its analysis instantly.
 
 ### 5. ✅ Verify Sources & Export
 - **Source Verification:** Assigns trust levels to data sources (e.g., "High" for Official Press Release, "Low" for Unverified Social).
 - **Export Analysis:** Download reports in Markdown, JSON, or Text for offline sharing.
 
+### 6. 🎬 Cinematic UI
+A premium, high-fidelity interface featuring a deep radial gradient, tech-grid overlay, and cyan/indigo atmospheric glows for a state-of-the-art "Command Center" feel.
+
 ---
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
+
+SiliconPulse uses a decoupled architecture designed for high-velocity data.
 
 ```mermaid
 graph TD
     subgraph "Data Layer"
         Stream[Live Data Stream] --> |JSONL| Ingest[Ingestion Engine]
-        Ingest --> Storage[(Vector/Stream Store)]
+        Ingest --> Storage[(SQLite / Stream Store)]
+        Sources[Perplexity / X] --> |Scheduled Pull| Ingest
     end
 
     subgraph "Backend (FastAPI)"
@@ -76,111 +82,140 @@ graph TD
     end
 ```
 
+### Request Flow:
+1.  **Poll**: Frontend polls `/api/signals` every 5s to update the live feed.
+2.  **Query**: User submits a query -> Backend retrieves relevant evidence from the JSONL stream using synonym expansion.
+3.  **Synthesize**: Evidence is passed to Gemini with a strategic prompt -> Structured JSON report is generated.
+4.  **Inject**: User injects a signal -> Backend appends to stream -> Next query immediately includes this new data.
+
 ---
 
-## 🛠️ Setup & Installation
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Framer Motion.
+- **Backend**: FastAPI (Python 3.10+), Uvicorn, APScheduler.
+- **AI/LLM**: Google Gemini 1.5 Flash (Primary) & 1.5 Pro (Fallback).
+- **Data/Storage**: JSONL (Streaming format), SQLite (Deduplication & Metadata).
+- **APIs**: Perplexity AI, X (Twitter) API.
+
+---
+
+## 📂 Folder Structure
+
+```text
+siliconpulse/
+├── backend/
+│   ├── app/
+│   │   ├── routes.py       # API Endpoints
+│   │   ├── models.py       # Pydantic Schemas
+│   │   ├── services/       # Gemini Client
+│   │   ├── sources/        # Perplexity & X Integrations
+│   │   └── utils.py        # Confidence & Signal Logic
+│   ├── data/               # Live stream.jsonl & SQLite DB
+│   └── main.py             # FastAPI Entry Point
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # UI Components (Radar, Insight, etc.)
+│   │   ├── api/            # API Client (Axios)
+│   │   └── App.tsx         # Main Dashboard Logic
+│   └── index.html          # Entry Point
+└── README.md               # You are here
+```
+
+---
+
+## ⚙️ Setup & Run Instructions
 
 ### Prerequisites
-- Node.js (v18+)
-- Python (v3.10+)
+- Python 3.10+
+- Node.js 18+
 - Google Gemini API Key
 
 ### 1. Backend Setup
-```bash
+```powershell
 cd backend
 python -m venv venv
-# Windows
-.\venv\Scripts\activate
-# Mac/Linux
-source venv/bin/activate
+.\venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Mac/Linux
 
 pip install -r requirements.txt
 
 # Create .env file
 echo "GEMINI_API_KEY=your_key_here" > .env
-echo "DATA_STREAM_PATH=data/stream.jsonl" >> .env
-
-# Run Server
-python -m uvicorn app.main:app --reload
 ```
 
 ### 2. Frontend Setup
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-### 3. Configure Sources (Optional)
-To enable live data fetching from Perplexity or X, update your `.env` file:
-```bash
-PERPLEXITY_ENABLED=True
-PERPLEXITY_API_KEY=your_key
-X_ENABLED=True
-X_BEARER_TOKEN=your_token
-```
-*Note: Without keys, the system automatically falls back to simulated data for reliable demos.*
-
-Access the dashboard at `http://localhost:5173`.
+### 3. Environment Variables (.env)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GEMINI_API_KEY` | **Required** for AI Insights | - |
+| `DATA_STREAM_PATH` | Path to JSONL stream | `data/stream.jsonl` |
+| `FRESHNESS_HOURS` | Window for "live" data | `12` |
+| `PERPLEXITY_API_KEY` | Optional for live news pull | - |
 
 ---
 
-## 🎮 Demo Instructions
+## 🔌 API Endpoints
 
-### 1. Inject a Signal
-Simulate a breaking market event:
-1. Click the **Inject_Signal** button (top right).
-2. Enter details:
-   - **Title**: "TSMC 2nm Yields Hit 80%"
-   - **Source**: "Supply Chain Leak"
-   - **Content**: "Internal reports confirm N2 process is ahead of schedule."
-3. Click **Transmit**. Watch the **Live Ticker** update instantly!
-
-### 2. Query the Intelligence Engine
-Ask a strategic question:
-1. Type: *"What is the status of 2nm production?"*
-2. The system will:
-   - Retrieve the signal you just injected.
-   - Format it into a context block.
-   - Generate a **Strategic Insight** using Gemini.
-3. Review the "Strategic Insight" and the supporting "Evidence" below it.
-
-### 3. Export & Verify
-1. After generating an insight, click **Export Analysis** to download a report.
-2. Click **Verify Sources** to cross-reference the retrieved data with trusted domains.
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `POST` | `/api/query` | Retrieve evidence & compute dynamic confidence. |
+| `POST` | `/api/generate` | Synthesize strategic insight using Gemini. |
+| `POST` | `/api/inject` | Manually push a signal into the live stream. |
+| `GET` | `/api/signals` | Fetch the latest signals for the live feed. |
+| `GET` | `/api/radar` | Get company activity levels for the radar UI. |
+| `GET` | `/api/recommendations` | Get dynamic, context-aware query suggestions. |
+| `POST` | `/api/export` | Download report in MD, JSON, or TXT format. |
+| `GET` | `/api/sources/verify` | Verify source credibility and trust levels. |
 
 ---
 
-## 🔌 API Reference
+## 📡 Real-Time / Streaming Functionality
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/inject` | Push a new event into the data stream. |
-| `POST` | `/api/query` | Retrieve top-k relevant events for a query. |
-| `POST` | `/api/generate` | Generate an AI insight based on context. |
-| `GET` | `/api/signals` | Get the latest 10 raw signals. |
-| `GET` | `/api/radar` | Get aggregated activity stats per company. |
-| `GET` | `/api/recommendations` | Get dynamic query suggestions. |
-| `POST` | `/api/export` | Export analysis to file. |
-| `POST` | `/api/verify` | Verify source credibility. |
+SiliconPulse implements a **Reactive Intelligence Loop**:
+- **Polling Mechanism**: The frontend refreshes the live feed every 5 seconds, ensuring the "Pulse" is always current.
+- **Background Scheduler**: The backend runs a task every 5 minutes to pull fresh signals from Perplexity and X.
+- **Immediate Consistency**: Injected signals are appended to the JSONL stream and are immediately available for RAG retrieval without re-indexing.
+- **Deduplication**: A hash-based fingerprinting system in SQLite ensures that duplicate news items from different sources are merged.
 
 ---
 
-## 💡 Why Pathway Matters
+## 🎮 Demo Instructions (For Judges)
 
-In high-frequency markets like semiconductors, **static databases are liabilities**. 
+Follow this 2-minute pipeline to see SiliconPulse in action:
 
-SiliconPulse is built on the philosophy of **Reactive Data Processing** (championed by Pathway):
-1.  **Zero Latency**: Insights are updated the moment data arrives, not when a batch job runs.
-2.  **Consistency**: The "Live Ticker" and "RAG Context" are always in sync.
-3.  **Scalability**: Stream processing handles infinite data velocity better than traditional CRUD apps.
-
-*Note: This demo uses a file-based stream to simulate the Pathway experience for hackathon portability.*
+1.  **Start the System**: Ensure both Backend and Frontend are running.
+2.  **Explore Recommendations**: Click a recommended query like *"NVIDIA-TSMC Pipeline"* to see instant RAG retrieval.
+3.  **Analyze Insight**: Review the **Strategic Insight** report. Note the **Confidence Meter**—it explains *why* the AI trusts the data.
+4.  **Inject a Signal**: 
+    - Click **Inject Signal** (top right).
+    - Title: `China restricts Neon exports to TSMC`
+    - Content: `New export controls targeting semiconductor raw materials.`
+    - Click **Transmit**.
+5.  **Observe Reactivity**: Re-run the same query or search for *"Neon supply"*. The AI will now incorporate the injected signal into its "Impact Reasoning" and "Strategic Outlook".
+6.  **Verify & Export**: Click **Verify Sources** to see trust levels, then **Export Analysis** to save the report.
 
 ---
 
-## 🔮 Future Work
+## 🔗 Submission Links
+- **GitHub Repo**: [SiliconPulse Repository](https://github.com/SanskarG-20/SiliconPulse---DataQuest-2026)
+- **Demo Video**: [Loom/Drive Link Placeholder]
 
-- **Real Pathway Integration**: Replace file I/O with `pathway` for true enterprise-grade streaming.
-- **Multi-Modal Ingestion**: Ingest PDF reports and earnings call audio.
-- **Graph RAG**: Map supply chain dependencies (e.g., ASML -> TSMC -> NVIDIA).
+---
+
+## 👥 Team & Credits
+- **Team SiliconPulse** (DataQuest 2026)
+- Built with ❤️ using Google Gemini & FastAPI.
+
+---
+
+## 🔮 Future Scope
+- **Graph RAG**: Mapping complex supply chain dependencies (e.g., ASML -> TSMC -> NVIDIA) for deeper impact analysis.
+- **Multi-Modal Ingestion**: Processing PDF earnings reports and financial charts directly.
+- **Pathway Integration**: Moving from file-based streaming to true enterprise-grade stream processing with Pathway.
