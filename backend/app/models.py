@@ -18,6 +18,12 @@ class EvidenceItem(BaseModel):
     event_type: Optional[str] = Field(None, description="Type of event")
     url: Optional[str] = Field(None, description="URL of the event")
     event_id: Optional[str] = Field(None, description="Unique event ID")
+    
+class ConfidenceInfo(BaseModel):
+    """Confidence information for the query results"""
+    score: int = Field(..., description="Numeric confidence score (0-100)")
+    label: str = Field(..., description="Confidence label (LOW/MEDIUM/HIGH)")
+    reason: str = Field(..., description="Reasoning for the confidence level")
 
 
 class QueryResponse(BaseModel):
@@ -28,6 +34,7 @@ class QueryResponse(BaseModel):
     last_updated: str = Field(..., description="Timestamp of last update")
     report: Optional[str] = Field(None, description="Generated intelligence report")
     llm_status: Optional[str] = Field("pending", description="Status of LLM generation")
+    confidence: Optional[ConfidenceInfo] = Field(None, description="Dynamic confidence assessment")
     stream_path_used: Optional[str] = Field(None, description="Path of the stream file used")
 
 

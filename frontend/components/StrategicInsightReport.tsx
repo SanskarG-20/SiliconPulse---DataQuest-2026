@@ -111,15 +111,30 @@ export const StrategicInsightReport: React.FC<StrategicInsightReportProps> = ({ 
                         )}
 
                         {/* Confidence Meter */}
-                        {section.id === 'confidence' && section.value && (
-                            <div className="flex items-center space-x-4 mt-2">
-                                <div className={`px-3 py-1 rounded-md text-xs font-black uppercase tracking-widest ${section.value.toLowerCase() === 'high' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                        section.value.toLowerCase() === 'medium' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                            'bg-red-500/10 text-red-500 border border-red-500/20'
-                                    }`}>
-                                    {section.value} Confidence
+                        {section.id === 'confidence' && (
+                            <div className="mt-2">
+                                <div className="flex items-center space-x-4 mb-2">
+                                    <div className={`px-3 py-1 rounded-md text-xs font-black uppercase tracking-widest ${(section.value || '').toLowerCase() === 'high' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                            (section.value || '').toLowerCase() === 'medium' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                                'bg-red-500/10 text-red-500 border border-red-500/20'
+                                        }`}>
+                                        {section.value} Confidence
+                                    </div>
+                                    {section.reason && <p className="text-xs text-slate-500 italic">{section.reason}</p>}
                                 </div>
-                                {section.reason && <p className="text-xs text-slate-500 italic">{section.reason}</p>}
+
+                                {/* Dynamic Score Bar (if available) */}
+                                {section.id === 'confidence' && (
+                                    <div className="w-full max-w-xs h-1 bg-slate-800 rounded-full overflow-hidden mt-3">
+                                        <div
+                                            className={`h-full transition-all duration-1000 ${(section.value || '').toLowerCase() === 'high' ? 'bg-emerald-500' :
+                                                    (section.value || '').toLowerCase() === 'medium' ? 'bg-amber-500' :
+                                                        'bg-red-500'
+                                                }`}
+                                            style={{ width: `${(section.value || '').toLowerCase() === 'high' ? 85 : (section.value || '').toLowerCase() === 'medium' ? 55 : 25}%` }}
+                                        ></div>
+                                    </div>
+                                )}
                             </div>
                         )}
 

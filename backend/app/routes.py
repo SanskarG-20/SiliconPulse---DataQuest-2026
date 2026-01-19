@@ -14,14 +14,18 @@ from app.settings import settings
 from app.sources.perplexity_source import pull_perplexity_signals
 from app.sources.x_source import pull_x_signals
 from app.utils import (
-    safe_read_jsonl, compute_signal_strength, now_ts, compute_event_id, 
-    compute_recency_boost, normalize_text, deduplicate_and_append,
+    safe_read_jsonl, 
+    compute_confidence,
+    now_ts, 
+    compute_event_id, 
+    compute_recency_boost, 
+    normalize_text, 
+    deduplicate_and_append,
     format_error_response
 )
 from app.services.gemini_client import gemini_client
 from app.demo_generator import DemoGenerator
 from app import storage
-
 
 router = APIRouter()
 import logging
@@ -285,7 +289,8 @@ async def process_query(request: QueryRequest):
         result = {
             "query": request.query,
             "evidence": evidence_list,
-            "signal_strength": compute_signal_strength(evidence_list),
+            "signal_strength": compute_confidence(evidence_list)["score"],
+            "confidence": compute_confidence(evidence_list),
             "last_updated": datetime.now().isoformat(),
             "report": None,
             "llm_status": "pending",
@@ -305,6 +310,7 @@ async def process_query(request: QueryRequest):
             query=request.query,
             evidence=[],
             signal_strength=0,
+            confidence=compute_confidence([]),
             last_updated=datetime.now().isoformat(),
             report=None,
             llm_status="failed"
@@ -376,15 +382,71 @@ async def generate_insight(request: GenerateRequest):
 
         # 1. Gating Logic: Check evidence count
         # We estimate evidence count by looking for the separator pattern used in frontend
-        # formatEvidenceToContext uses: [Timestamp | Source] Title ...
         evidence_count = request.context.count("[20") # Crude but effective for ISO timestamps in context
         
         logger.info(f"Generating insight for query: '{request.query}' | Evidence Count: {evidence_count} | Context Len: {len(request.context)}")
 
-        if evidence_count < 2:
-            logger.warning("Skipping Gemini call due to low evidence.")
-            return GenerateResponse(insight="**Insufficient Data for Strategic Synthesis**\n\nWaiting for more live signals to generate a high-confidence report. Current data stream is too sparse for deep analysis.\n\n*System Status: Monitoring for new events...*")
+        # NEW RULE: If evidence_count == 0, return a structured fallback
+        if evidence_count == 0:
+            logger.info("Zero evidence found. Generating structured fallback.")
+            
+            # Fetch latest 3 signals for context
+            data_path = settings.resolved_data_path
+            latest_events = safe_read_jsonl(data_path, limit=3)
+            
+            # Construct suggestions based on query or general tech
+            from app.company_dict import COMPANY_DICT
+            suggestions = []
+            query_upper = request.query.upper()
+            
+            # Try to find matching company for better suggestions
+            matched_company = None
+            for company, data in COMPANY_DICT.items():
+                if query_upper in company.upper() or any(a.upper() in query_upper for a in data.get("aliases", [])):
+                    matched_company = company
+                    break
+            
+            if matched_company:
+                suggestions = [f"Recent {matched_company} yield reports", f"{matched_company} supply chain updates", f"Competitor impact on {matched_company}"]
+            else:
+                suggestions = ["Top 3 high-impact events", "Semiconductor supply chain status", "AI infrastructure updates"]
 
+            fallback_report = {
+                "sections": [
+                    {
+                        "id": "evidence",
+                        "title": "Insufficient Live Signals",
+                        "points": [
+                            f"No direct evidence found for '{request.query}' in the current data stream.",
+                            "The system is actively monitoring global nodes for relevant signals."
+                        ]
+                    },
+                    {
+                        "id": "change",
+                        "title": "Alternative Directives",
+                        "points": suggestions
+                    },
+                    {
+                        "id": "outlook",
+                        "title": "Latest Global Signals",
+                        "points": [f"[{e.get('source', 'Unknown')}] {e.get('title', 'Untitled')}" for e in latest_events] if latest_events else ["Monitoring for new signals..."]
+                    },
+                    {
+                        "id": "confidence",
+                        "title": "Confidence Meter",
+                        "value": "Low",
+                        "reason": "Zero matching evidence items found."
+                    },
+                    {
+                        "id": "ceo",
+                        "title": "System Status",
+                        "text": "We are currently scanning for signals matching your query. In the meantime, consider the alternative directives or review the latest global feed above."
+                    }
+                ]
+            }
+            return GenerateResponse(insight=json.dumps(fallback_report))
+
+        # NEW RULE: If evidence_count >= 1, ALWAYS generate report
         prompt = f"""
         You are SiliconPulse, an advanced strategic intelligence engine. 
         Generate a high-precision intelligence report based on the provided context.
@@ -397,7 +459,10 @@ async def generate_insight(request: GenerateRequest):
         INSTRUCTIONS:
         - Analyze the provided evidence carefully.
         - Output strictly valid JSON. Do not include markdown formatting (like ```json).
-        - If the context is empty or irrelevant, return a JSON with a single section explaining "Insufficient Data".
+        - IMPORTANT: Even if there is only ONE evidence item, extract all possible facts and implications.
+        - If evidence is low, focus on "What we know" vs "What we don't know".
+        - Include uncertainties and monitoring suggestions in the "outlook" section.
+        - Ensure the "confidence" section reflects the limited data (e.g., "Low" or "Medium").
         
         JSON SCHEMA:
         {{
@@ -406,7 +471,7 @@ async def generate_insight(request: GenerateRequest):
             {{ "id": "change", "title": "What Changed", "points": ["..."] }},
             {{ "id": "impact", "title": "Impact Reasoning", "points": ["..."] }},
             {{ "id": "competitors", "title": "Competitor Effects", "points": ["..."] }},
-            {{ "id": "outlook", "title": "Strategic Outlook (7 Days)", "points": ["..."] }},
+            {{ "id": "outlook", "title": "Strategic Outlook & Uncertainties", "points": ["..."] }},
             {{ "id": "confidence", "title": "Confidence Meter", "value": "Low|Medium|High", "reason": "..." }},
             {{ "id": "ceo", "title": "CEO Summary", "text": "..." }}
           ]
@@ -430,9 +495,6 @@ async def generate_insight(request: GenerateRequest):
             insight_text = json.dumps(parsed_json)
         except json.JSONDecodeError:
             logger.warning("Gemini output invalid JSON, attempting repair or fallback.")
-            # If simple strip didn't work, maybe it has comments or other issues.
-            # For now, we return it as is, but logged.
-            # Ideally we could use a repair library, but we'll rely on the frontend fallback.
             pass
             
         return GenerateResponse(insight=insight_text)

@@ -8,6 +8,7 @@ import { LiveTicker } from './components/LiveTicker';
 import { CompanyRadar } from './components/CompanyRadar';
 import { MarkdownRenderer } from './components/MarkdownRenderer';
 import { StrategicInsightReport } from './components/StrategicInsightReport';
+import { BackgroundLayer } from './components/BackgroundLayer';
 import { querySiliconPulse, injectSignal, fetchSignals, QueryResponse, formatEvidenceToContext, generateInsight, bootstrapSystem, fetchRecommendations, exportAnalysis, verifySources } from './api/siliconpulseApi';
 import { INITIAL_LIVE_FEED } from './constants';
 import { LiveEvent } from './types';
@@ -113,20 +114,16 @@ const App: React.FC = () => {
       setLoading(false); // Stop loading spinner immediately after evidence is shown
 
       // 2. Generate Insight ASYNCHRONOUSLY in background
-      if (result.evidence.length > 0) {
-        // Don't await - let it load in background
-        const context = formatEvidenceToContext(result.evidence);
-        generateInsight(finalQuery, context)
-          .then(generatedInsight => {
-            setInsight(generatedInsight);
-          })
-          .catch(err => {
-            console.error("Insight generation failed:", err);
-            setInsight("Insight generation unavailable. Evidence displayed above.");
-          });
-      } else {
-        setInsight("No sufficient evidence found in the data stream to generate a specific insight.");
-      }
+      // NEW RULE: Always request insight, backend handles zero-evidence fallbacks
+      const context = formatEvidenceToContext(result.evidence);
+      generateInsight(finalQuery, context)
+        .then(generatedInsight => {
+          setInsight(generatedInsight);
+        })
+        .catch(err => {
+          console.error("Insight generation failed:", err);
+          setInsight("Insight generation unavailable. Evidence displayed above.");
+        });
 
       setQuery('');
       setLastUpdate(new Date().toLocaleTimeString());
@@ -195,7 +192,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#020617] text-slate-200 relative">
+    <div className="flex flex-col h-screen overflow-hidden text-slate-200 relative">
+      <BackgroundLayer />
       {/* INJECTION MODAL */}
       {showInjectModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -455,7 +453,7 @@ const App: React.FC = () => {
         </aside>
 
         {/* QUERY & REPORT ZONE */}
-        <section className="flex-1 flex flex-col bg-[#010409] relative">
+        <section className="flex-1 flex flex-col bg-transparent relative">
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-10 custom-scrollbar">
 
             {/* INITIAL / IDLE STATE (QUICK QUERIES) */}
@@ -739,7 +737,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                  <span className="text-sky-500/60 font-mono">GEMINI_3_PRO_REASONING_ACTIVE</span>
+                  <span className="text-sky-500/60 font-mono">GEMINI_1_5_PRO_REASONING_ACTIVE</span>
                 </div>
               </div>
             </div>

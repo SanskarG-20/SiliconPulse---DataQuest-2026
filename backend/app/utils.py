@@ -191,17 +191,93 @@ def safe_read_jsonl(path: Path, limit: int = 200, freshness_hours: Optional[int]
         logger.error(f"Error reading JSONL: {e}")
         return []
 
-def compute_signal_strength(evidence: list) -> int:
+def compute_confidence(evidence: list) -> dict:
     """
-    Compute signal strength (0-100) based on evidence count and recency.
+    Compute dynamic confidence score (0-100), label, and reason.
+    
+    Rules:
+    - Evidence Count: >=6 (+50), 3-5 (+30), 1-2 (+15), 0 (+0)
+    - Recency: Latest evidence < 2h (+25), < 12h (+15), else (+5)
+    - Source Reliability: High trust (+15), Medium (+10), Low (+5)
     """
     if not evidence:
-        return 0
+        return {
+            "score": 0,
+            "label": "LOW",
+            "reason": "No evidence found in current data stream."
+        }
     
-    base_score = min(len(evidence) * 15, 60) # Max 60 from count
+    score = 0
+    count = len(evidence)
     
-    # Recency bonus
-    recent_count = sum(1 for e in evidence if "hours ago" in str(e.timestamp) or "minutes ago" in str(e.timestamp))
-    recency_score = min(recent_count * 10, 40) # Max 40 from recency
+    # 1. Evidence Count
+    if count >= 6:
+        score += 50
+    elif count >= 3:
+        score += 30
+    elif count >= 1:
+        score += 15
+        
+    # 2. Recency Factor
+    try:
+        # Sort evidence by timestamp to find the latest
+        sorted_ev = sorted(evidence, key=lambda x: parse_timestamp(x.timestamp) if hasattr(x, 'timestamp') and x.timestamp else datetime.min, reverse=True)
+        latest_ts = sorted_ev[0].timestamp if sorted_ev and hasattr(sorted_ev[0], 'timestamp') else None
+        
+        if latest_ts:
+            latest_time = parse_timestamp(latest_ts)
+            age_hours = (datetime.utcnow() - latest_time).total_seconds() / 3600
+            
+            if age_hours < 2:
+                score += 25
+            elif age_hours < 12:
+                score += 15
+            else:
+                score += 5
+        else:
+            score += 5
+    except Exception as e:
+        logger.warning(f"Error computing recency for confidence: {e}")
+        score += 5
+        
+    # 3. Source Reliability
+    # High trust: Reuters, Bloomberg, Official, etc.
+    # Medium: Perplexity, TechCrunch, etc.
+    # Low: X, Rumor, etc.
+    high_trust = ["reuters", "bloomberg", "official", "press release", "sec", "nasdaq"]
+    med_trust = ["perplexity", "techcrunch", "verge", "wired", "wsj", "nyt"]
     
-    return min(base_score + recency_score, 100)
+    sources = [str(e.source).lower() if hasattr(e, 'source') else "" for e in evidence]
+    
+    source_boost = 5 # Default low
+    for s in sources:
+        if any(ht in s for ht in high_trust):
+            source_boost = 15
+            break
+        if any(mt in s for mt in med_trust):
+            source_boost = max(source_boost, 10)
+            
+    score += source_boost
+    
+    # Clamp
+    score = min(100, score)
+    
+    # Label
+    if score >= 70:
+        label = "HIGH"
+    elif score >= 40:
+        label = "MEDIUM"
+    else:
+        label = "LOW"
+        
+    # Reason
+    recency_str = "very recent" if score >= 25 else "recent" if score >= 15 else "older"
+    source_str = "reliable" if source_boost == 15 else "mixed" if source_boost == 10 else "unverified"
+    
+    reason = f"{count} evidence items found, latest is {recency_str}, {source_str} sources."
+    
+    return {
+        "score": score,
+        "label": label,
+        "reason": reason
+    }
