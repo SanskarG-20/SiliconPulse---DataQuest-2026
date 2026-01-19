@@ -304,7 +304,7 @@ Follow this 3-minute pipeline to see SiliconPulse + Pathway in action:
 ---
 
 ## 👥 Team & Credits
-- **Team SiliconPulse** (DataQuest 2026)
+- **Team Apex** (DataQuest 2026)
 - Built with ❤️ using Google Gemini, Pathway & FastAPI.
 
 ---
