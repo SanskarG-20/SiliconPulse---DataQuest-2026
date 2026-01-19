@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     checkpoint_enabled: bool = os.getenv("CHECKPOINT_ENABLED", "true").lower() == "true"
     db_path: str = os.getenv("DB_PATH", "data/siliconpulse.db")
     
+    # Pathway Settings
+    use_pathway: bool = os.getenv("USE_PATHWAY", "True").lower() == "true"
+    pathway_output_path: str = os.getenv("PATHWAY_OUTPUT_PATH", "data/pathway_out.jsonl")
+    
     # Perplexity Settings
     perplexity_api_key: str = os.getenv("PERPLEXITY_API_KEY", "")
     perplexity_enabled: bool = os.getenv("PERPLEXITY_ENABLED", "False").lower() == "true"
@@ -55,6 +59,15 @@ class Settings(BaseSettings):
         if path.is_absolute():
             return path
         # Resolve relative to backend root
+        base_dir = Path(__file__).resolve().parent.parent
+        return base_dir / path
+
+    @property
+    def resolved_pathway_path(self) -> Path:
+        """Resolve pathway output path to absolute path"""
+        path = Path(self.pathway_output_path)
+        if path.is_absolute():
+            return path
         base_dir = Path(__file__).resolve().parent.parent
         return base_dir / path
 

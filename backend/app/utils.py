@@ -157,6 +157,14 @@ def safe_read_jsonl(path: Path, limit: int = 200, freshness_hours: Optional[int]
         # If filtering by freshness, we might need to read more lines to find enough fresh ones
         # So we read more if freshness filter is active
         read_limit = limit * 5 if freshness_hours else limit
+
+        # PATHWAY INTEGRATION: Check if we should read from pathway output instead
+        from app.settings import settings
+        if settings.use_pathway:
+            pathway_path = settings.resolved_pathway_path
+            if pathway_path.exists() and pathway_path.stat().st_size > 0:
+                path = pathway_path
+                # logger.info(f"Reading from Pathway output: {path}")
             
         with open(path, "r", encoding="utf-8", errors="ignore") as f:
             all_lines = f.readlines()

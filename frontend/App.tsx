@@ -1,8 +1,10 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import {
-  Search, Terminal, Zap, Activity, Cpu, ShieldAlert,
-  BarChart3, RefreshCw, Layers, TrendingUp, HelpCircle,
-  Clock, CheckCircle2, AlertCircle, FileText, ExternalLink, X
+  Search, Zap, Activity, Cpu, ShieldAlert,
+  TrendingUp, Layers, FileText, CheckCircle2,
+  AlertCircle, RefreshCw, Terminal, Clock,
+  ExternalLink, BarChart3, HelpCircle, X,
+  Menu
 } from 'lucide-react';
 import { LiveTicker } from './components/LiveTicker';
 import { CompanyRadar } from './components/CompanyRadar';
@@ -34,6 +36,7 @@ const App: React.FC = () => {
   // Export & Verify State
   const [showExportModal, setShowExportModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [exportFormat, setExportFormat] = useState('md');
   const [includeEvidence, setIncludeEvidence] = useState(true);
   const [verifiedSources, setVerifiedSources] = useState<any[]>([]);
@@ -391,10 +394,55 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+      {/* MOBILE DRAWER */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 z-[110] lg:hidden animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onClick={() => setShowMobileMenu(false)}></div>
+          <div className="absolute inset-y-0 left-0 w-80 bg-[#020617] border-r border-slate-800 p-6 space-y-8 animate-in slide-in-from-left duration-300">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em]">Command Center</h3>
+              <button onClick={() => setShowMobileMenu(false)} className="text-slate-500 hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            <CompanyRadar />
+
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center">
+                <Zap size={14} className="mr-2 text-amber-500" />
+                High Priority Signals
+              </h3>
+              <div className="space-y-3">
+                {liveFeed.filter(f => f.impactScore > 80).slice(0, 3).map(ev => (
+                  <div key={ev.id} className="glass p-3 rounded-xl border-slate-800/50 hover:border-sky-500/30 transition-all cursor-pointer group">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] font-mono text-sky-500">{ev.timestamp.split(' ')[1]}</span>
+                      <span className="px-1.5 py-0.5 rounded-[4px] bg-red-500/10 text-red-500 text-[8px] font-black uppercase tracking-tighter border border-red-500/20">Critical</span>
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-100 group-hover:text-sky-400 leading-tight transition-colors mb-1">{ev.title}</h4>
+                    <div className="flex items-center text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                      <span>{ev.company}</span>
+                      <span className="mx-1.5 opacity-20">|</span>
+                      <span>{ev.impactScore} IMPACT</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* HEADER SECTION */}
-      <header className="h-14 border-b border-slate-800/60 flex items-center justify-between px-6 bg-slate-950/40 backdrop-blur-xl z-50">
-        <div className="flex items-center space-x-4">
+      <header className="h-14 border-b border-slate-800/60 flex items-center justify-between px-4 md:px-6 bg-slate-950/40 backdrop-blur-xl z-50">
+        <div className="flex items-center space-x-3 md:space-x-4">
+          <button
+            onClick={() => setShowMobileMenu(true)}
+            className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-white transition-colors"
+          >
+            <Menu size={20} />
+          </button>
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-sky-600 rounded flex items-center justify-center shadow-[0_0_15px_rgba(2,132,199,0.3)]">
               <Cpu size={18} className="text-white" />
@@ -402,12 +450,12 @@ const App: React.FC = () => {
             <div className="leading-tight">
               <h1 className="text-sm font-black tracking-tighter uppercase text-white flex items-center">
                 Silicon<span className="text-sky-500">Pulse</span>
-                <span className="ml-2 px-1 py-0.5 bg-sky-500/10 text-sky-500 border border-sky-500/20 rounded-[4px] text-[8px] tracking-[0.1em]">OS_v4</span>
+                <span className="ml-2 px-1 py-0.5 bg-sky-500/10 text-sky-500 border border-sky-500/20 rounded-[4px] text-[8px] tracking-[0.1em] hidden sm:inline-block">OS_v4</span>
               </h1>
             </div>
           </div>
-          <div className="h-4 w-[1px] bg-slate-800"></div>
-          <div className="flex items-center space-x-4">
+          <div className="h-4 w-[1px] bg-slate-800 hidden md:block"></div>
+          <div className="hidden md:flex items-center space-x-4">
             <div className="flex items-center space-x-1.5 group cursor-help">
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest group-hover:text-emerald-400 transition-colors">Nodes_Online</span>
@@ -419,13 +467,14 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 md:space-x-3">
           <button
             onClick={() => setShowInjectModal(true)}
-            className="flex items-center space-x-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 rounded-md text-[10px] font-black uppercase tracking-widest text-sky-400 border border-slate-800 transition-all active:scale-95"
+            className="flex items-center space-x-2 px-2 md:px-3 py-1.5 bg-slate-900 hover:bg-slate-800 rounded-md text-[10px] font-black uppercase tracking-widest text-sky-400 border border-slate-800 transition-all active:scale-95"
           >
             <Zap size={12} />
-            <span>Inject_Signal</span>
+            <span className="hidden sm:inline">Inject_Signal</span>
+            <span className="sm:hidden">Inject</span>
           </button>
         </div>
       </header>
@@ -437,7 +486,7 @@ const App: React.FC = () => {
       <main className="flex-1 flex overflow-hidden">
 
         {/* RADAR ZONE (SIDEBAR) */}
-        <aside className="w-80 border-r border-slate-800/40 bg-slate-950/20 p-6 space-y-8 hidden xl:block overflow-y-auto custom-scrollbar">
+        <aside className="w-80 border-r border-slate-800/40 bg-slate-950/20 p-6 space-y-8 hidden lg:block overflow-y-auto custom-scrollbar">
           <CompanyRadar />
 
           <div className="space-y-4">
@@ -477,32 +526,32 @@ const App: React.FC = () => {
         </aside>
 
         {/* QUERY & REPORT ZONE */}
-        <section className="flex-1 flex flex-col bg-transparent relative">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+        <section className="flex-1 flex flex-col bg-transparent relative overflow-hidden">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
 
             {/* INITIAL / IDLE STATE (QUICK QUERIES) */}
             {!queryResult && !loading && !error && (
-              <div className="h-full flex flex-col justify-center max-w-4xl mx-auto space-y-12">
+              <div className="h-full flex flex-col justify-center max-w-4xl mx-auto space-y-8 md:space-y-12">
                 <div className="space-y-4">
                   <div className="inline-flex items-center space-x-2 px-3 py-1 bg-sky-500/10 border border-sky-500/20 rounded-full text-sky-500 text-[10px] font-black uppercase tracking-widest animate-pulse">
                     <Layers size={12} />
                     <span>Ready for Intelligence Generation</span>
                   </div>
-                  <h2 className="text-5xl font-black text-white tracking-tighter uppercase leading-none">
+                  <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase leading-none">
                     Strategic <br /> Intelligence <span className="text-sky-500">Node</span>
                   </h2>
-                  <p className="text-slate-500 text-lg font-medium max-w-xl">
+                  <p className="text-slate-500 text-base md:text-lg font-medium max-w-xl">
                     Monitor live supply chain signals, yield reports, and geopolitical shifts. Select a directive or enter a custom query.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                   {(recommendations.length > 0 ? recommendations : [
                     { label: "NVIDIA-TSMC Pipeline", query: "Any new NVIDIA-TSMC contract today?", icon: Zap, color: "text-amber-400" },
                     { label: "Foundry Design Wins", query: "Status of Intel 18A design wins and foundry clients?", icon: CheckCircle2, color: "text-emerald-400" },
                     { label: "AI Infra Analysis", query: "What is the impact of Meta's new AI infra updates?", icon: Cpu, color: "text-sky-400" },
                     { label: "High Impact Summary", "query": "What are the top 3 high-impact events in last 2 hours?", icon: AlertCircle, color: "text-red-400" }
-                  ]).map((item: any) => {
+                  ]).map((item: any, idx: number) => {
                     // Map string icon names to components if needed, or use defaults
                     const IconComponent = typeof item.icon === 'string'
                       ? (item.icon === 'Activity' ? Activity :
@@ -511,24 +560,22 @@ const App: React.FC = () => {
                             item.icon === 'TrendingUp' ? TrendingUp :
                               item.icon === 'Zap' ? Zap :
                                 item.icon === 'ShieldAlert' ? ShieldAlert :
-                                  item.icon === 'BarChart3' ? BarChart3 :
-                                    item.icon === 'Layers' ? Layers :
-                                      item.icon === 'FileText' ? FileText :
-                                        AlertCircle)
-                      : item.icon;
+                                  item.icon === 'CheckCircle2' ? CheckCircle2 :
+                                    item.icon === 'AlertCircle' ? AlertCircle : Search)
+                      : (item.icon || Search);
 
                     return (
                       <button
-                        key={item.label}
+                        key={`${item.label}-${idx}`}
                         onClick={() => handleSubmit(item.query)}
-                        className="glass glass-hover p-5 text-left rounded-2xl transition-all flex items-start space-x-4 group"
+                        className="glass glass-hover p-4 md:p-5 text-left rounded-2xl transition-all flex items-start space-x-4 group"
                       >
-                        <div className={`p-3 bg-slate-900 rounded-xl group-hover:bg-slate-800 transition-colors ${item.color}`}>
-                          <IconComponent size={20} />
+                        <div className={`p-2 md:p-3 bg-slate-900 rounded-xl group-hover:bg-slate-800 transition-colors ${item.color}`}>
+                          <IconComponent size={18} />
                         </div>
-                        <div className="flex-1">
-                          <span className="text-xs font-black uppercase tracking-[0.1em] text-slate-500 mb-1 block group-hover:text-slate-300 transition-colors">{item.label}</span>
-                          <p className="text-sm font-medium text-slate-300 group-hover:text-white leading-tight">{item.query}</p>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-500 mb-1 block group-hover:text-slate-300 transition-colors">{item.label}</span>
+                          <p className="text-xs md:text-sm font-medium text-slate-300 group-hover:text-white leading-tight truncate">{item.query}</p>
                         </div>
                       </button>
                     );
@@ -717,58 +764,58 @@ const App: React.FC = () => {
           </div>
 
           {/* INPUT BAR (STICKY BOTTOM) */}
-          <div className="p-8 bg-slate-950/60 backdrop-blur-2xl border-t border-slate-800/60 relative z-40">
-            <div className="max-w-4xl mx-auto space-y-4">
+          <div className="p-4 md:p-8 bg-slate-950/60 backdrop-blur-2xl border-t border-slate-800/60 relative z-40">
+            <div className="max-w-4xl mx-auto space-y-3 md:space-y-4">
               <form onSubmit={handleSubmit} className="relative group">
                 <div className="absolute inset-0 -m-[1px] bg-gradient-to-r from-sky-500/40 via-indigo-500/40 to-sky-500/40 rounded-2xl opacity-0 group-focus-within:opacity-100 blur-[6px] transition-all duration-500"></div>
-                <div className="relative flex items-center bg-slate-900 border border-slate-700/60 rounded-2xl overflow-hidden px-5 focus-within:border-sky-500/50 shadow-2xl transition-all">
-                  <Terminal className="text-slate-500 mr-4" size={20} />
+                <div className="relative flex items-center bg-slate-900 border border-slate-700/60 rounded-2xl overflow-hidden px-4 md:px-5 focus-within:border-sky-500/50 shadow-2xl transition-all">
+                  <Terminal className="text-slate-500 mr-3 md:mr-4 hidden sm:block" size={20} />
                   <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="ENTER COMMAND OR QUERY PULSE..."
-                    className="flex-1 py-5 bg-transparent outline-none text-slate-100 placeholder-slate-600 font-mono text-sm tracking-tight"
+                    placeholder="ENTER COMMAND OR QUERY..."
+                    className="flex-1 py-4 md:py-5 bg-transparent outline-none text-slate-100 placeholder-slate-600 font-mono text-xs md:text-sm tracking-tight"
                     disabled={loading}
                   />
-                  <div className="flex items-center space-x-4">
-                    <div className="hidden sm:flex items-center space-x-2 px-2 py-1 bg-slate-800/50 rounded-md border border-slate-700/50">
+                  <div className="flex items-center space-x-2 md:space-x-4">
+                    <div className="hidden md:flex items-center space-x-2 px-2 py-1 bg-slate-800/50 rounded-md border border-slate-700/50">
                       <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">ENTER</span>
                     </div>
                     <button
                       type="submit"
                       disabled={loading || !query.trim()}
-                      className={`p-3 rounded-xl transition-all ${loading || !query.trim()
+                      className={`p-2.5 md:p-3 rounded-xl transition-all ${loading || !query.trim()
                         ? 'text-slate-600 bg-slate-800/50'
                         : 'text-white bg-sky-600 hover:bg-sky-500 shadow-[0_0_20px_rgba(14,165,233,0.4)] active:scale-95'
                         }`}
                     >
-                      <Search size={22} />
+                      <Search size={20} />
                     </button>
                   </div>
                 </div>
               </form>
 
               <div className="flex items-center justify-between px-2">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-2">
-                    <Clock size={12} className="text-slate-500" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Context Freshness: <span className="text-sky-500">{lastUpdate}</span></span>
+                <div className="flex items-center space-x-4 md:space-x-6">
+                  <div className="flex items-center space-x-1.5 md:space-x-2">
+                    <Clock size={10} className="text-slate-500" />
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Freshness: <span className="text-sky-500">{lastUpdate}</span></span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <TrendingUp size={12} className="text-emerald-500" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Signals Active: <span className="text-emerald-500">{liveFeed.length}</span></span>
+                  <div className="flex items-center space-x-1.5 md:space-x-2">
+                    <TrendingUp size={10} className="text-emerald-500" />
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Active: <span className="text-emerald-500">{liveFeed.length}</span></span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2 text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                  <span className="text-sky-500/60 font-mono">GEMINI_1_5_PRO_REASONING_ACTIVE</span>
+                <div className="hidden sm:flex items-center space-x-2 text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                  <span className="text-sky-500/60 font-mono">GEMINI_ACTIVE</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
       </main>
-    </div >
+    </div>
   );
 };
 

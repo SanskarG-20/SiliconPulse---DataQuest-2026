@@ -1,10 +1,10 @@
 # ⚡ SiliconPulse (DataQuest 2026)
 
 > **Real-time Strategic Intelligence for the Semiconductor & AI Era.**  
-> *Powered by Gemini 1.5 Pro & Live Signal Processing.*
+> *Powered by Gemini 1.5 Pro, Pathway Streaming & Live Signal Processing.*
 
 ![Status](https://img.shields.io/badge/Status-Hackathon_Submission-success)
-![Tech](https://img.shields.io/badge/Stack-FastAPI_React_Gemini-blue)
+![Tech](https://img.shields.io/badge/Stack-FastAPI_React_Gemini_Pathway-blue)
 ![Focus](https://img.shields.io/badge/Focus-Market_Intelligence-purple)
 
 ---
@@ -23,7 +23,7 @@ SiliconPulse addresses the **information overload** in the fast-moving tech sect
 - **RAG / Live Intelligence:** We don't just search; we retrieve live events from a streaming pipeline and perform **Retrieval Augmented Generation (RAG)** to generate fresh insights.
 - **Dynamic Grounding:** Every AI claim is backed by specific, clickable evidence from the live feed.
 - **Real-time Reasoning:** The system adapts its analysis the moment a new signal is injected, providing up-to-the-minute strategic outlooks.
-- **System Design:** A robust decoupled architecture with a FastAPI gateway, background schedulers, and a high-performance React frontend.
+- **System Design:** A robust decoupled architecture with Pathway stream processing, FastAPI gateway, background schedulers, and a high-performance React frontend.
 
 ---
 
@@ -55,45 +55,161 @@ A premium, high-fidelity interface featuring a deep radial gradient, tech-grid o
 
 ## 🏗️ Architecture Overview
 
-SiliconPulse uses a decoupled architecture designed for high-velocity data.
+SiliconPulse uses a decoupled architecture designed for high-velocity data with **Pathway** as the real-time ingestion and processing layer.
 
 ```mermaid
 graph TD
-    subgraph "Data Layer"
-        Stream[Live Data Stream] --> |JSONL| Ingest[Ingestion Engine]
-        Ingest --> Storage[(SQLite / Stream Store)]
-        Sources[Perplexity / X] --> |Scheduled Pull| Ingest
+    subgraph "Data Ingestion Layer"
+        Sources[Perplexity / X / Manual Inject] -->|Write| RawStream[data/stream.jsonl]
+        RawStream -->|Continuous Read| Pathway[Pathway Pipeline]
+        Pathway -->|Normalize + Dedup + Enrich| ProcessedStream[data/pathway_out.jsonl]
     end
 
     subgraph "Backend (FastAPI)"
         API[API Gateway] --> QueryEngine
         API --> Injector
         API --> Recommender
-        QueryEngine --> |Retrieve| Storage
-        QueryEngine --> |Context| LLM[Google Gemini]
-        Recommender --> |Analyze| Storage
+        QueryEngine -->|Retrieve Evidence| ProcessedStream
+        QueryEngine -->|Fallback if Pathway down| RawStream
+        QueryEngine -->|Context| LLM[Google Gemini]
+        Recommender -->|Analyze| ProcessedStream
+        Injector -->|Append| RawStream
     end
 
     subgraph "Frontend (React + Vite)"
-        UI[Dashboard] --> |Poll| API
-        UI --> |Inject| Injector
-        UI --> |Query| QueryEngine
-        UI --> |Export/Verify| API
+        UI[Dashboard] -->|Poll /api/signals| API
+        UI -->|Inject Signal| Injector
+        UI -->|Query| QueryEngine
+        UI -->|Export/Verify| API
     end
 ```
 
 ### Request Flow:
-1.  **Poll**: Frontend polls `/api/signals` every 5s to update the live feed.
-2.  **Query**: User submits a query -> Backend retrieves relevant evidence from the JSONL stream using synonym expansion.
-3.  **Synthesize**: Evidence is passed to Gemini with a strategic prompt -> Structured JSON report is generated.
-4.  **Inject**: User injects a signal -> Backend appends to stream -> Next query immediately includes this new data.
+1.  **Ingest**: Live sources (Perplexity, X) and manual injections write to `data/stream.jsonl`.
+2.  **Process**: Pathway continuously reads the raw stream, normalizes data, deduplicates by `event_id`, enriches with company/event_type tags, and writes to `data/pathway_out.jsonl`.
+3.  **Retrieve**: FastAPI's `QueryEngine` reads from the processed stream (with automatic fallback to raw stream if Pathway is unavailable).
+4.  **Synthesize**: Evidence is passed to Gemini with a strategic prompt → Structured JSON report is generated.
+5.  **Display**: Frontend polls `/api/signals` every 5s to update the live feed and displays insights.
+
+---
+
+## 🌊 Pathway Streaming Pipeline
+
+SiliconPulse uses **Pathway** to provide an enterprise-grade real-time data processing layer, demonstrating applied AI system design for the DataQuest challenge.
+
+### What is Pathway?
+Pathway is a Python framework for high-throughput stream processing. In SiliconPulse, it serves as the **intelligent ingestion engine** that transforms raw market signals into clean, deduplicated, and enriched data ready for RAG retrieval.
+
+### Why Pathway Matters for DataQuest:
+- **Real-time System Design**: Demonstrates production-grade streaming architecture beyond simple file I/O.
+- **Applied AI**: Combines rule-based enrichment (keyword tagging) with downstream LLM synthesis.
+- **RAG Enhancement**: Clean, deduplicated data improves retrieval quality and reduces hallucination risk.
+- **Scalability**: Pathway's streaming model is designed for continuous, high-velocity data—critical for real-world intelligence systems.
+
+### Transformations Performed:
+1. **Normalization**: Strips whitespace, lowercases text for consistent matching.
+2. **Deduplication**: Computes a stable `event_id` (SHA256 hash of title + content + URL) to ensure each market event is processed only once, even if reported by multiple sources.
+3. **Enrichment/Tagging**: 
+   - Automatically identifies `company` (NVIDIA, TSMC, Intel, etc.) based on content keywords.
+   - Tags `event_type` (product_launch, contract, supply_chain, m_and_a, financial) for structured analysis.
+4. **Freshness Window**: Maintains a rolling 12-hour window of "live" signals for time-sensitive intelligence.
+5. **Streaming Output**: Continuously writes processed records to `data/pathway_out.jsonl` in real-time.
+
+### Integration with FastAPI:
+- The backend's `safe_read_jsonl()` function checks the `USE_PATHWAY` environment variable.
+- If enabled and `pathway_out.jsonl` exists, it reads from the processed stream.
+- **Demo-Proof Fallback**: If Pathway is not running or the output file is empty, the system automatically falls back to `stream.jsonl`, ensuring zero downtime during demos.
+
+---
+
+## ⚙️ How to Run (Pathway Mode)
+
+### Prerequisites
+- **Python 3.11** (Required for Pathway compatibility)
+- **Node.js 18+**
+- **Google Gemini API Key**
+
+### Step-by-Step Instructions
+
+**Terminal 1: Start Pathway Pipeline**
+```bash
+cd backend
+python pathway_pipeline.py
+```
+*You should see: "🚀 Starting Pathway Pipeline..." and continuous processing logs.*
+
+**Terminal 2: Start FastAPI Backend**
+```bash
+cd backend
+uvicorn app.main:app --reload --port 8000
+```
+*Backend will auto-detect `pathway_out.jsonl` and use it as the primary data source.*
+
+**Terminal 3: Start React Frontend**
+```bash
+cd frontend
+npm install  # First time only
+npm run dev
+```
+*Frontend will be available at `http://localhost:5173`*
+
+### Quick Start (Windows PowerShell Scripts)
+We provide one-click scripts for convenience:
+
+```powershell
+# Terminal 1
+cd backend
+.\run_pathway.ps1
+
+# Terminal 2
+cd backend
+.\run_backend.ps1
+
+# Terminal 3
+cd frontend
+.\run_frontend.ps1
+```
+
+---
+
+## ✅ Verification Steps
+
+### 1. Verify Pathway Integration
+```bash
+cd backend
+python test_pathway.py
+```
+**Expected Output:**
+```
+🧪 Starting Pathway Integration Test...
+📡 Checking initial signals...
+✅ Received 20 initial signals
+💉 Injecting test signal: PATHWAY_TEST_SIGNAL_...
+✅ Signal injected successfully
+⏳ Waiting 5 seconds for Pathway processing...
+📡 Verifying signal in feed...
+✅ SUCCESS: Found processed signal in feed!
+```
+
+### 2. Check Backend Health
+```bash
+curl http://localhost:8000/health
+```
+**Expected:** `{"status": "healthy"}`
+
+### 3. Verify Processed Signals
+```bash
+curl http://localhost:8000/api/signals
+```
+**Expected:** JSON array of signals with `event_id`, `company`, and `event_type` fields populated by Pathway.
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS, Lucide Icons, Framer Motion.
-- **Backend**: FastAPI (Python 3.10+), Uvicorn, APScheduler.
+- **Backend**: FastAPI (Python 3.11), Uvicorn, APScheduler.
+- **Stream Processing**: **Pathway** (Real-time ingestion, deduplication, enrichment).
 - **AI/LLM**: Google Gemini 1.5 Flash (Primary) & 1.5 Pro (Fallback).
 - **Data/Storage**: JSONL (Streaming format), SQLite (Deduplication & Metadata).
 - **APIs**: Perplexity AI, X (Twitter) API.
@@ -110,54 +226,20 @@ siliconpulse/
 │   │   ├── models.py       # Pydantic Schemas
 │   │   ├── services/       # Gemini Client
 │   │   ├── sources/        # Perplexity & X Integrations
-│   │   └── utils.py        # Confidence & Signal Logic
-│   ├── data/               # Live stream.jsonl & SQLite DB
-│   └── main.py             # FastAPI Entry Point
+│   │   ├── utils.py        # Confidence & Signal Logic (Pathway fallback)
+│   │   └── settings.py     # Environment Config (USE_PATHWAY)
+│   ├── data/               
+│   │   ├── stream.jsonl         # Raw signal stream
+│   │   └── pathway_out.jsonl    # Processed stream (Pathway output)
+│   ├── pathway_pipeline.py      # Pathway streaming logic
+│   ├── test_pathway.py          # Integration verification script
+│   └── run_*.ps1                # Quick-start scripts
 ├── frontend/
-│   ├── src/
-│   │   ├── components/     # UI Components (Radar, Insight, etc.)
-│   │   ├── api/            # API Client (Axios)
-│   │   └── App.tsx         # Main Dashboard Logic
-│   └── index.html          # Entry Point
+│   ├── components/         # UI Components (Radar, Insight, etc.)
+│   ├── api/                # API Client (Axios)
+│   └── App.tsx             # Main Dashboard Logic
 └── README.md               # You are here
 ```
-
----
-
-## ⚙️ Setup & Run Instructions
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Google Gemini API Key
-
-### 1. Backend Setup
-```powershell
-cd backend
-python -m venv venv
-.\venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Mac/Linux
-
-pip install -r requirements.txt
-
-# Create .env file
-echo "GEMINI_API_KEY=your_key_here" > .env
-```
-
-### 2. Frontend Setup
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-### 3. Environment Variables (.env)
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GEMINI_API_KEY` | **Required** for AI Insights | - |
-| `DATA_STREAM_PATH` | Path to JSONL stream | `data/stream.jsonl` |
-| `FRESHNESS_HOURS` | Window for "live" data | `12` |
-| `PERPLEXITY_API_KEY` | Optional for live news pull | - |
 
 ---
 
@@ -178,28 +260,40 @@ npm run dev
 
 ## 📡 Real-Time / Streaming Functionality
 
-SiliconPulse implements a **Reactive Intelligence Loop**:
-- **Polling Mechanism**: The frontend refreshes the live feed every 5 seconds, ensuring the "Pulse" is always current.
-- **Background Scheduler**: The backend runs a task every 5 minutes to pull fresh signals from Perplexity and X.
-- **Immediate Consistency**: Injected signals are appended to the JSONL stream and are immediately available for RAG retrieval without re-indexing.
-- **Deduplication**: A hash-based fingerprinting system in SQLite ensures that duplicate news items from different sources are merged.
+SiliconPulse implements a **Reactive Intelligence Loop** powered by Pathway:
+
+- **Pathway Continuous Processing**: The Pathway pipeline runs in streaming mode, continuously monitoring `stream.jsonl` for new events. When a new signal is detected (from scheduled pulls or manual injection), Pathway immediately processes it and updates `pathway_out.jsonl`.
+  
+- **Polling Mechanism**: The frontend refreshes the live feed every 5 seconds by calling `/api/signals`, ensuring the "Pulse" is always current.
+
+- **Background Scheduler**: The backend runs a task every 5 minutes to pull fresh signals from Perplexity and X, which are written to `stream.jsonl` and automatically picked up by Pathway.
+
+- **Inject Signal Reactivity**: When a user injects a custom signal via the UI:
+  1. Signal is appended to `stream.jsonl`
+  2. Pathway detects the new line and processes it (normalize, dedup, enrich)
+  3. Processed signal appears in `pathway_out.jsonl` within seconds
+  4. Next query or feed refresh immediately includes the enriched signal
+
+- **Deduplication**: Pathway's `event_id` fingerprinting ensures that duplicate news items from different sources are merged, preventing redundant analysis.
 
 ---
 
 ## 🎮 Demo Instructions (For Judges)
 
-Follow this 2-minute pipeline to see SiliconPulse in action:
+Follow this 3-minute pipeline to see SiliconPulse + Pathway in action:
 
-1.  **Start the System**: Ensure both Backend and Frontend are running.
-2.  **Explore Recommendations**: Click a recommended query like *"NVIDIA-TSMC Pipeline"* to see instant RAG retrieval.
-3.  **Analyze Insight**: Review the **Strategic Insight** report. Note the **Confidence Meter**—it explains *why* the AI trusts the data.
-4.  **Inject a Signal**: 
+1.  **Start the System**: Ensure Pathway, Backend, and Frontend are running (see "How to Run" above).
+2.  **Verify Pathway**: Run `python test_pathway.py` to confirm the streaming pipeline is active.
+3.  **Explore Recommendations**: Click a recommended query like *"NVIDIA-TSMC Pipeline"* to see instant RAG retrieval from the processed stream.
+4.  **Analyze Insight**: Review the **Strategic Insight** report. Note the **Confidence Meter**—it explains *why* the AI trusts the data.
+5.  **Inject a Signal**: 
     - Click **Inject Signal** (top right).
     - Title: `China restricts Neon exports to TSMC`
     - Content: `New export controls targeting semiconductor raw materials.`
     - Click **Transmit**.
-5.  **Observe Reactivity**: Re-run the same query or search for *"Neon supply"*. The AI will now incorporate the injected signal into its "Impact Reasoning" and "Strategic Outlook".
-6.  **Verify & Export**: Click **Verify Sources** to see trust levels, then **Export Analysis** to save the report.
+6.  **Observe Pathway Processing**: Wait 2-3 seconds. Check the live feed—the injected signal should appear with auto-tagged `company: TSMC` and `event_type: supply_chain`.
+7.  **Re-Query**: Search for *"Neon supply"* or *"TSMC supply chain"*. The AI will now incorporate the injected signal into its "Impact Reasoning" and "Strategic Outlook", demonstrating real-time RAG.
+8.  **Verify & Export**: Click **Verify Sources** to see trust levels, then **Export Analysis** to save the report.
 
 ---
 
@@ -211,11 +305,11 @@ Follow this 2-minute pipeline to see SiliconPulse in action:
 
 ## 👥 Team & Credits
 - **Team SiliconPulse** (DataQuest 2026)
-- Built with ❤️ using Google Gemini & FastAPI.
+- Built with ❤️ using Google Gemini, Pathway & FastAPI.
 
 ---
 
 ## 🔮 Future Scope
 - **Graph RAG**: Mapping complex supply chain dependencies (e.g., ASML -> TSMC -> NVIDIA) for deeper impact analysis.
 - **Multi-Modal Ingestion**: Processing PDF earnings reports and financial charts directly.
-- **Pathway Integration**: Moving from file-based streaming to true enterprise-grade stream processing with Pathway.
+- **Distributed Pathway**: Scaling to multiple Pathway workers for enterprise-grade throughput (1M+ events/day).
