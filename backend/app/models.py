@@ -86,6 +86,7 @@ class ExportRequest(BaseModel):
     report: str = Field(..., description="The generated report content")
     evidence: list[EvidenceItem] = Field(..., description="List of evidence items")
     format: str = Field(..., description="Export format: md, json, txt, pdf")
+    include_evidence: bool = Field(default=True, description="Whether to include evidence in the export")
 
 
 class SourceVerifyItem(BaseModel):

@@ -35,6 +35,7 @@ const App: React.FC = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [exportFormat, setExportFormat] = useState('md');
+  const [includeEvidence, setIncludeEvidence] = useState(true);
   const [verifiedSources, setVerifiedSources] = useState<any[]>([]);
   const [verifying, setVerifying] = useState(false);
 
@@ -168,7 +169,8 @@ const App: React.FC = () => {
         queryResult.query,
         insight,
         queryResult.evidence,
-        exportFormat
+        exportFormat,
+        includeEvidence
       );
       setShowExportModal(false);
     } catch (err) {
@@ -276,94 +278,116 @@ const App: React.FC = () => {
                       </>
                     )}
 
-                    {/* EXPORT MODAL */}
-                    {showExportModal && (
-                      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                        <div className="w-full max-w-md bg-[#020617] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative">
-                          <button onClick={() => setShowExportModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
-                          <div className="p-6 border-b border-slate-800/50">
-                            <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
-                              <BarChart3 size={20} className="mr-2 text-sky-500" /> Export Analysis
-                            </h3>
-                          </div>
-                          <div className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-3">
-                              {['md', 'json', 'txt', 'pdf'].map(fmt => (
-                                <button
-                                  key={fmt}
-                                  onClick={() => setExportFormat(fmt)}
-                                  className={`p-3 rounded-lg border text-sm font-bold uppercase tracking-widest transition-all ${exportFormat === fmt
-                                    ? 'bg-sky-500/20 border-sky-500 text-sky-400'
-                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'
-                                    }`}
-                                >
-                                  .{fmt}
-                                </button>
-                              ))}
-                            </div>
-                            <button
-                              onClick={handleExport}
-                              className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)] mt-4"
-                            >
-                              Download Report
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* VERIFY SOURCES MODAL */}
-                    {showVerifyModal && (
-                      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                        <div className="w-full max-w-2xl bg-[#020617] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[80vh]">
-                          <button onClick={() => setShowVerifyModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
-                          <div className="p-6 border-b border-slate-800/50 shrink-0">
-                            <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
-                              <HelpCircle size={20} className="mr-2 text-emerald-500" /> Source Verification
-                            </h3>
-                          </div>
-                          <div className="p-6 overflow-y-auto custom-scrollbar">
-                            {verifying ? (
-                              <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                                <RefreshCw size={32} className="animate-spin text-emerald-500" />
-                                <span className="text-sm font-mono text-slate-400 uppercase tracking-widest">Verifying Source Integrity...</span>
-                              </div>
-                            ) : (
-                              <div className="space-y-3">
-                                {verifiedSources.map((src, idx) => (
-                                  <div key={idx} className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 flex items-start justify-between">
-                                    <div className="flex-1 pr-4">
-                                      <div className="flex items-center space-x-2 mb-1">
-                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${src.trust_level === 'High' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                          src.trust_level === 'Medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                            'bg-red-500/10 text-red-500 border-red-500/20'
-                                          }`}>
-                                          {src.trust_level} Trust
-                                        </span>
-                                        <span className="text-[10px] font-bold text-slate-500">{src.source}</span>
-                                        <span className="text-[10px] text-slate-600">•</span>
-                                        <span className="text-[10px] text-slate-600">{new Date(src.timestamp).toLocaleString()}</span>
-                                      </div>
-                                      <h4 className="text-sm font-bold text-slate-200 mb-1">{src.title}</h4>
-                                      <p className="text-xs text-slate-500 italic">{src.reason}</p>
-                                    </div>
-                                    {src.url && (
-                                      <a href={src.url} target="_blank" rel="noreferrer" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
-                                        <ExternalLink size={16} />
-                                      </a>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </button>
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* EXPORT MODAL */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-[#020617] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative">
+            <button onClick={() => setShowExportModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
+            <div className="p-6 border-b border-slate-800/50">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
+                <BarChart3 size={20} className="mr-2 text-sky-500" /> Export Analysis
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Select Format</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {['md', 'json', 'txt', 'pdf'].map(fmt => (
+                    <button
+                      key={fmt}
+                      onClick={() => setExportFormat(fmt)}
+                      className={`p-3 rounded-lg border text-sm font-bold uppercase tracking-widest transition-all ${exportFormat === fmt
+                        ? 'bg-sky-500/20 border-sky-500 text-sky-400'
+                        : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'
+                        }`}
+                    >
+                      .{fmt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="includeEvidence"
+                  checked={includeEvidence}
+                  onChange={(e) => setIncludeEvidence(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-sky-500 focus:ring-sky-500/50"
+                />
+                <label htmlFor="includeEvidence" className="text-xs font-bold text-slate-300 cursor-pointer">Include evidence items in report</label>
+              </div>
+
+              <button
+                onClick={handleExport}
+                className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-black uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)] mt-4"
+              >
+                Download Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VERIFY SOURCES MODAL */}
+      {showVerifyModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-[#020617] border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[80vh]">
+            <button onClick={() => setShowVerifyModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={20} /></button>
+            <div className="p-6 border-b border-slate-800/50 shrink-0">
+              <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
+                <HelpCircle size={20} className="mr-2 text-emerald-500" /> Source Verification
+              </h3>
+            </div>
+            <div className="p-6 overflow-y-auto custom-scrollbar">
+              {verifying ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <RefreshCw size={32} className="animate-spin text-emerald-500" />
+                  <span className="text-sm font-mono text-slate-400 uppercase tracking-widest">Verifying Source Integrity...</span>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {verifiedSources.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-slate-500 text-sm italic">No sources found for this query.</p>
+                    </div>
+                  ) : (
+                    verifiedSources.map((src, idx) => (
+                      <div key={idx} className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 flex items-start justify-between">
+                        <div className="flex-1 pr-4">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${src.trust_level === 'High' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                              src.trust_level === 'Medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                'bg-red-500/10 text-red-500 border-red-500/20'
+                              }`}>
+                              {src.trust_level} Trust
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-500">{src.source}</span>
+                            <span className="text-[10px] text-slate-600">•</span>
+                            <span className="text-[10px] text-slate-600">{src.timestamp ? new Date(src.timestamp).toLocaleString() : 'N/A'}</span>
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-200 mb-1">{src.title}</h4>
+                          <p className="text-xs text-slate-500 italic">{src.reason}</p>
+                        </div>
+                        {src.url && (
+                          <a href={src.url} target="_blank" rel="noreferrer" className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                            <ExternalLink size={16} />
+                          </a>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -744,7 +768,7 @@ const App: React.FC = () => {
           </div>
         </section>
       </main>
-    </div>
+    </div >
   );
 };
 

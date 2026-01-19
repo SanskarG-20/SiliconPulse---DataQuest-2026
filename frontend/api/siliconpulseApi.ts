@@ -182,7 +182,8 @@ export const exportAnalysis = async (
     query: string,
     report: string,
     evidence: any[],
-    format: string
+    format: string,
+    include_evidence: boolean = true
 ): Promise<void> => {
     try {
         console.log(`Exporting analysis as ${format}...`);
@@ -191,7 +192,7 @@ export const exportAnalysis = async (
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ query, report, evidence, format }),
+            body: JSON.stringify({ query, report, evidence, format, include_evidence }),
         });
 
         if (!response.ok) {

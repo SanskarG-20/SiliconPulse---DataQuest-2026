@@ -16,6 +16,7 @@ from app.sources.x_source import pull_x_signals
 from app.utils import (
     safe_read_jsonl, 
     compute_confidence,
+    get_trust_info,
     now_ts, 
     compute_event_id, 
     compute_recency_boost, 
@@ -684,13 +685,15 @@ async def export_analysis(request: ExportRequest):
             content += f"**Query:** {request.query}\n"
             content += f"**Date:** {datetime.now().isoformat()}\n\n"
             content += f"## Strategic Insight\n\n{request.report}\n\n"
-            content += f"## Evidence\n\n"
-            for item in request.evidence:
-                content += f"- **{item.title}** ({item.source})\n"
-                content += f"  - {item.snippet}\n"
-                if item.url:
-                    content += f"  - [Link]({item.url})\n"
-                content += "\n"
+            
+            if request.include_evidence:
+                content += f"## Evidence\n\n"
+                for item in request.evidence:
+                    content += f"- **{item.title}** ({item.source})\n"
+                    content += f"  - {item.snippet}\n"
+                    if item.url:
+                        content += f"  - [Link]({item.url})\n"
+                    content += "\n"
                 
         elif request.format == "json":
             filename += ".json"
@@ -698,9 +701,10 @@ async def export_analysis(request: ExportRequest):
             export_data = {
                 "query": request.query,
                 "timestamp": datetime.now().isoformat(),
-                "report": request.report,
-                "evidence": [item.dict() for item in request.evidence]
+                "report": request.report
             }
+            if request.include_evidence:
+                export_data["evidence"] = [item.dict() for item in request.evidence]
             content = json.dumps(export_data, indent=2)
             
         elif request.format == "txt":
@@ -713,14 +717,16 @@ async def export_analysis(request: ExportRequest):
             content += f"STRATEGIC INSIGHT\n"
             content += f"-----------------\n"
             content += f"{request.report}\n\n"
-            content += f"EVIDENCE\n"
-            content += f"--------\n"
-            for item in request.evidence:
-                content += f"* {item.title} ({item.source})\n"
-                content += f"  {item.snippet}\n"
-                if item.url:
-                    content += f"  Link: {item.url}\n"
-                content += "\n"
+            
+            if request.include_evidence:
+                content += f"EVIDENCE\n"
+                content += f"--------\n"
+                for item in request.evidence:
+                    content += f"* {item.title} ({item.source})\n"
+                    content += f"  {item.snippet}\n"
+                    if item.url:
+                        content += f"  Link: {item.url}\n"
+                    content += "\n"
         
         elif request.format == "pdf":
              filename += ".txt"
@@ -745,37 +751,48 @@ async def verify_sources(query: str):
     Re-runs a quick retrieval to identify sources and assign trust levels.
     """
     try:
-        # Re-use retrieval logic (simplified)
         # 1. Read fresh events
         data_path = settings.resolved_data_path
-        events = safe_read_jsonl(data_path, limit=200, freshness_hours=24)
+        events = safe_read_jsonl(data_path, limit=settings.max_events_to_scan, freshness_hours=settings.freshness_hours)
         
-        # 2. Filter relevant events (simple keyword match)
+        # 2. Filter relevant events (same logic as query)
         from app.company_dict import COMPANY_DICT
         
-        # Expand keywords (same logic as query)
         raw_keywords = [kw.lower() for kw in query.split() if len(kw) > 2]
         query_keywords = set(raw_keywords)
         
         for company, data in COMPANY_DICT.items():
             aliases = [a.lower() for a in data.get("aliases", [])]
             aliases.append(company.lower())
-            is_relevant = False
-            for kw in raw_keywords:
-                if kw in aliases:
-                    is_relevant = True
-                trust_level = "Low"
-                reason = "Social media signal (unverified)"
-                
-            verified_sources.append(SourceVerifyItem(
-                timestamp=event.get("timestamp"),
-                source=source,
-                title=event.get("title", ""),
-                url=event.get("url"),
-                trust_level=trust_level,
-                reason=reason
-            ))
+            if any(kw in aliases for kw in raw_keywords):
+                query_keywords.update(aliases)
+        
+        verified_sources = []
+        seen_titles = set()
+        
+        for event in events:
+            title = event.get("title", "").lower()
+            content = event.get("content", "").lower()
             
+            if any(kw in title or kw in content for kw in query_keywords):
+                if event.get("title") not in seen_titles:
+                    seen_titles.add(event.get("title"))
+                    
+                    source_name = event.get("source", "Unknown")
+                    trust_info = get_trust_info(source_name)
+                    
+                    verified_sources.append(SourceVerifyItem(
+                        timestamp=event.get("timestamp"),
+                        source=source_name,
+                        title=event.get("title", "Untitled"),
+                        url=event.get("url"),
+                        trust_level=trust_info["trust_level"],
+                        reason=trust_info["reason"]
+                    ))
+            
+            if len(verified_sources) >= 10:
+                break
+                
         return SourceVerifyResponse(
             query=query,
             sources=verified_sources
@@ -783,4 +800,4 @@ async def verify_sources(query: str):
 
     except Exception as e:
         logger.error(f"Source verification failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return SourceVerifyResponse(query=query, sources=[])

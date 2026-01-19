@@ -281,3 +281,29 @@ def compute_confidence(evidence: list) -> dict:
         "label": label,
         "reason": reason
     }
+
+def get_trust_info(source_name: str) -> dict:
+    """
+    Get trust level and reason for a given source.
+    """
+    source_lower = source_name.lower()
+    
+    # High Trust Sources
+    high_trust = ["reuters", "bloomberg", "sec", "official", "press release", "cnbc", "wsj"]
+    for s in high_trust:
+        if s in source_lower:
+            return {"trust_level": "High", "reason": "Verified institutional news source"}
+            
+    # Medium Trust Sources
+    medium_trust = ["perplexity", "marketwire", "techcrunch", "the verge", "engadget"]
+    for s in medium_trust:
+        if s in source_lower:
+            return {"trust_level": "Medium", "reason": "Reputable tech/market aggregator"}
+            
+    # Low Trust Sources
+    low_trust = ["x", "twitter", "reddit", "blog", "social", "unverified"]
+    for s in low_trust:
+        if s in source_lower:
+            return {"trust_level": "Low", "reason": "Social media or unverified community signal"}
+            
+    return {"trust_level": "Low", "reason": "Unknown or unverified source"}

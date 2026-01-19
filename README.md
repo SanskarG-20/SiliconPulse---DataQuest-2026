@@ -44,9 +44,9 @@ Visual tracking of activity levels for top tech giants (NVIDIA, TSMC, Apple, etc
 ### 4. 💉 Inject Signal (Demo Mode)
 **Judge Favorite:** Manually inject a custom news event into the live stream to test the system's reactivity. Watch the AI adapt its analysis instantly.
 
-### 5. ✅ Verify Sources & Export
-- **Source Verification:** Assigns trust levels to data sources (e.g., "High" for Official Press Release, "Low" for Unverified Social).
-- **Export Analysis:** Download reports in Markdown, JSON, or Text for offline sharing.
+### 5. ✅ Verify Sources & Export (End-to-End)
+- **Source Verification**: Instantly verify the credibility of AI claims. The system assigns trust levels (e.g., "High" for Reuters/Bloomberg, "Low" for Unverified Social) and provides a specific reason for each trust score.
+- **Multi-Format Export**: Download your strategic analysis in **Markdown**, **JSON**, or **Text**. Choose whether to include the raw evidence items for a complete audit trail.
 
 ### 6. 🎬 Cinematic UI
 A premium, high-fidelity interface featuring a deep radial gradient, tech-grid overlay, and cyan/indigo atmospheric glows for a state-of-the-art "Command Center" feel.
@@ -171,8 +171,8 @@ npm run dev
 | `GET` | `/api/signals` | Fetch the latest signals for the live feed. |
 | `GET` | `/api/radar` | Get company activity levels for the radar UI. |
 | `GET` | `/api/recommendations` | Get dynamic, context-aware query suggestions. |
-| `POST` | `/api/export` | Download report in MD, JSON, or TXT format. |
-| `GET` | `/api/sources/verify` | Verify source credibility and trust levels. |
+| `POST` | `/api/export` | Download report in MD, JSON, or TXT format (supports `include_evidence` flag). |
+| `GET` | `/api/sources/verify` | Verify source credibility, trust levels, and justifications for a query. |
 
 ---
 
