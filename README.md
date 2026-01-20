@@ -299,7 +299,7 @@ Follow this 3-minute pipeline to see SiliconPulse + Pathway in action:
 
 ## 🔗 Submission Links
 - **GitHub Repo**: [SiliconPulse Repository](https://github.com/SanskarG-20/SiliconPulse---DataQuest-2026)
-- **Demo Video**: [Loom/Drive Link Placeholder]
+- **Demo Video & Documentation**: [Google Drive Folder](https://drive.google.com/drive/folders/12VR6gtvXoxyWGNPXKYMv1exD3fLhHTF2?usp=sharing)
 
 ---
 
