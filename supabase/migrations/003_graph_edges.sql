@@ -15,6 +15,9 @@ CREATE INDEX IF NOT EXISTS idx_graph_edges_source ON public.graph_edges (source)
 CREATE INDEX IF NOT EXISTS idx_graph_edges_target ON public.graph_edges (target);
 
 -- Enable RLS and allow broad access for the application
+-- NOTE: CREATE POLICY has no IF NOT EXISTS, so drop first to keep this re-runnable
 ALTER TABLE public.graph_edges ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow anonymous read graph_edges" ON public.graph_edges;
 CREATE POLICY "Allow anonymous read graph_edges" ON public.graph_edges FOR SELECT USING (true);
-CREATE POLICY "Allow all operations graph_edges" ON public.graph_edges FOR ALL USING (true);
+DROP POLICY IF EXISTS "Allow all operations graph_edges" ON public.graph_edges;
+CREATE POLICY "Allow all operations graph_edges" ON public.graph_edges FOR ALL USING (true) WITH CHECK (true);
