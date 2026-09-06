@@ -7,7 +7,6 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
-from typing import Optional
 
 import httpx
 from pydantic import BaseModel
@@ -87,7 +86,7 @@ class VideoItem(BaseModel):
 
 
 async def fetch_youtube_videos(
-    query: Optional[str] = None,
+    query: str | None = None,
     category: str = "all",
     limit: int = 8,
 ) -> list[dict]:

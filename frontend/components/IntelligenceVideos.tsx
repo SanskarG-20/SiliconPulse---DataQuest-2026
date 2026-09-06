@@ -49,11 +49,17 @@ export const IntelligenceVideos: React.FC<IntelligenceVideosProps> = ({ lastSubm
       if (res && res.length > 0) {
         setVideos(res);
       } else {
-        // Only set error if we couldn't even get defaults
-        if (videos.length === 0) setError(true);
+        // Only show error if we have nothing to display (functional update avoids stale closure)
+        setVideos((prev) => {
+          if (prev.length === 0) setError(true);
+          return prev;
+        });
       }
     } catch (e) {
-      if (videos.length === 0) setError(true);
+      setVideos((prev) => {
+        if (prev.length === 0) setError(true);
+        return prev;
+      });
     } finally {
       setLoading(false);
     }

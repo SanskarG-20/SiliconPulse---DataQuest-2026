@@ -55,6 +55,7 @@ The system degrades gracefully when keys are missing: Gemini calls return simula
 * **PDF / SEC ingestion** — `POST /api/ingest/pdf` (multipart, ≤10 MB, PyMuPDF text + tables, optional vision) and `POST /api/ingest/sec?days_back=3` (Finnhub 8-K for NVDA/TSM/INTC/AMD/AAPL/ASML/…).
 * **Live feed** — SWR polling (5s, pause when WebSocket open) plus `WebSocket /api/ws/signals?token=JWT` (10s push on hash change, ping/pong, exponential reconnect, 4401 on auth failure).
 * **Manual injection** — `POST /api/inject` with fingerprint dedup and optional Supabase audit.
+* **Intelligence Videos** — `GET /api/videos?query&category&limit` (YouTube Data API v3, 30-min cache, `15/min`) with context-aware `IntelligenceVideos.tsx` (category pills, skeletons, graceful `[]` without key).
 * **Source verification & export** — Trust levels (High/Medium/Low) and export to `md`/`json`/`txt`.
 * **Observability** — `/health` (DB, stream, Gemini, vector), `/ping` (~1 ms, no I/O, for keep-alive), `/metrics` (uptime, request/error counts, dedup count, vector count, embedding cache).
 
@@ -177,6 +178,7 @@ All settings are loaded by `backend/app/settings.py` (Pydantic Settings, `env_fi
 | `SUPABASE_URL` | Recommended | — | `https://<project>.supabase.co` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Recommended | — | Service role key (server-side only) |
 | `NEWSAPI_API_KEY` | No | — | NewsAPI.org key |
+| `YOUTUBE_API_KEY` | No | — | YouTube Data API v3 key for `GET /api/videos` (empty → `[]`, no crash) |
 | `FINNHUB_API_KEY` | No | — | Finnhub key for SEC 8-K |
 | `VITE_API_BASE_URL` | No | `http://127.0.0.1:8000/api` | Backend base for frontend |
 | `HOST` / `PORT` | No | `0.0.0.0` / `8000` | Uvicorn bind |
@@ -278,6 +280,7 @@ Base URL locally `http://localhost:8000`; in prod via `VITE_API_BASE_URL`.
 | `GET` | `/api/graph/suppliers/{company}?depth=2` | Clerk | — | Reverse BFS upstream |
 | `GET` | `/api/graph/explain/{company}?depth=2` | Clerk | — | Human-readable supply-chain context |
 | `POST` | `/api/graph/simulate` | Clerk | `15/min` | `{company, shock: -0.9..0.9, depth, metric}` → `shocked_score = original*(1+shock)`, `$M` est, LLM scenario |
+| `GET` | `/api/videos?query&category&limit` | Clerk | `15/min` | YouTube videos (`category=all/ai/semiconductor/product_launch/gpu/supply_chain/company_update`, `limit` 1–12, 30-min cache) |
 | `WS` | `/api/ws/signals?token=JWT` | Query JWT | — | Push on content hash change every 10s, `ping`→`pong`, close `4401` if auth fails |
 
 Interactive docs when running: `http://localhost:8000/docs` (OpenAPI) and `/redoc`.
@@ -431,7 +434,7 @@ Lint steps are non-blocking (`|| true`); typecheck and tests are blocking.
 * **Backend on Render:** set `HOST=0.0.0.0`, `PORT=8000`, all env from `.env.example`. Healthcheck `GET /health`. Free tier sleeps after 15 min — prevent with an UptimeRobot cron hitting `GET /ping` every 5 min (use `/ping`, not `/health`, to avoid DB/vector work). Alternatives: cron-job.org or paid Render.
 * **Frontend on Vercel:** set `VITE_API_BASE_URL=https://<render-backend>/api` and `VITE_CLERK_PUBLISHABLE_KEY`. The app shows `Deployment Configuration Error` at `/` if `VITE_CLERK_PUBLISHABLE_KEY` is missing. Redeploy after changing env.
 
-**Common deploy env:** `GEMINI_API_KEY`, `CLERK_ISSUER`, `CLERK_AUDIENCE`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, optional `NEWSAPI_API_KEY`/`FINNHUB_API_KEY`.
+**Common deploy env:** `GEMINI_API_KEY`, `CLERK_ISSUER`, `CLERK_AUDIENCE`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, optional `NEWSAPI_API_KEY`/`FINNHUB_API_KEY`/`YOUTUBE_API_KEY`.
 
 ---
 
