@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Zap, ShieldAlert, Bell } from 'lucide-react';
 import { CompanyRadar } from '../CompanyRadar';
 import { GraphPanel } from '../GraphPanel';
+import { TrendsPanel } from '../TrendsPanel';
 import { WatchlistAlerts } from '../WatchlistAlerts';
 import { getRelativeTimeLabel } from '../../utils/feedUtils';
 import { LiveEvent } from '../../types';
@@ -36,6 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ feed, watchlist, onCompanyClic
       {watchlist.length > 0 && (
         <WatchlistAlerts alerts={alerts} watchlist={watchlist} onCompanyClick={onCompanyClick} />
       )}
+
+      <TrendsPanel company={graphCompany} days={30} onCompanyClick={onCompanyClick} />
 
       <div className="space-y-3">
         <h3 className="display text-[10px] font-semibold tracking-[0.14em] text-slate-500 dark:text-[#64748B] flex items-center gap-1.5">

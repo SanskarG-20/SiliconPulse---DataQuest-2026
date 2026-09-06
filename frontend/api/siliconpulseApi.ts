@@ -497,6 +497,19 @@ export const fetchQueryHistory = async (limit = 8): Promise<any[]> => {
     }
 };
 
+export const fetchTrends = async (company?: string, days: number = 30): Promise<any | null> => {
+    try {
+        const params = new URLSearchParams();
+        if (company) params.append('company', company);
+        params.append('days', String(Math.max(1, Math.min(days, 90))));
+        const response = await apiFetch(`/trends?${params.toString()}`);
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();
