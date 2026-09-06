@@ -510,6 +510,20 @@ export const fetchTrends = async (company?: string, days: number = 30): Promise<
     }
 };
 
+export const fetchCompare = async (companies: string[], query = '', k = 5, depth = 2): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/compare`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ companies, query, k, depth }),
+        }, 30000);
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();

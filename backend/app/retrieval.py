@@ -1,0 +1,117 @@
+"""Shared evidence retrieval used by /query and /compare.
+
+Mirrors the retrieval stages in routes/query.py (DB hybrid -> local
+keyword + vector fallback) so comparison results stay consistent with
+single-query results. query.py itself is intentionally untouched.
+"""
+import logging
+
+from .company_dict import COMPANY_DICT
+from .models import EvidenceItem
+from .services.embedding_service import embed_text
+from .services.vector_store import is_available as vector_available
+from .services.vector_store import query_similar
+from .settings import settings
+from .utils import safe_read_jsonl
+
+logger = logging.getLogger(__name__)
+
+
+def _expand_keywords(query_text: str) -> list[str]:
+    raw_keywords = [kw.lower() for kw in query_text.split() if len(kw) > 2]
+    query_keywords = set(raw_keywords)
+    for company, data in COMPANY_DICT.items():
+        aliases = [a.lower() for a in data.get("aliases", [])]
+        aliases.append(company.lower())
+        if any(kw in aliases for kw in raw_keywords):
+            query_keywords.update(aliases)
+    return list(query_keywords)
+
+
+def _to_evidence(matched_events: list[dict]) -> list[EvidenceItem]:
+    evidence_list = []
+    for event in matched_events:
+        snippet = event.get("snippet", "")
+        if not snippet or len(snippet) < 10:
+            content = event.get("content", "")
+            snippet = (content[:200] + "...") if content and len(content) > 20 else event.get("title", "")
+        evidence_list.append(
+            EvidenceItem(
+                title=event.get("title", "Untitled"),
+                snippet=snippet,
+                source=event.get("source", "Unknown"),
+                timestamp=event.get("timestamp", ""),
+                url=event.get("url", ""),
+                company=event.get("company"),
+                event_type=event.get("event_type", "general"),
+            )
+        )
+    evidence_list.sort(key=lambda x: x.timestamp, reverse=True)
+    return evidence_list
+
+
+async def retrieve_evidence(query_text: str, k: int = 5) -> list[EvidenceItem]:
+    """Retrieve top-k evidence for a query string (DB hybrid, else local fallback)."""
+    k = max(1, min(k, 20))
+    matched_events: list[dict] = []
+    db_search_successful = False
+
+    if vector_available():
+        try:
+            from .services.vector_store import query_hybrid
+
+            q_emb = await embed_text(query_text)
+            if q_emb:
+                query_keywords = _expand_keywords(query_text)
+                ts_query_parts = [f'"{kw}"' if " " in kw else kw for kw in query_keywords]
+                ts_query_text = " OR ".join(ts_query_parts) if ts_query_parts else query_text
+                db_hits = query_hybrid(ts_query_text, q_emb, k=k * 2)
+                if db_hits is not None:
+                    matched_events = db_hits
+                    db_search_successful = True
+        except Exception as e:
+            logger.debug(f"retrieve_evidence DB hybrid failed, falling back to local: {e}")
+
+    if not db_search_successful:
+        data_path = settings.resolved_data_path
+        events = safe_read_jsonl(data_path, limit=settings.max_events_to_scan, freshness_hours=settings.freshness_hours)
+        if not events:
+            events = safe_read_jsonl(data_path, limit=settings.max_events_to_scan, freshness_hours=None)
+
+        vector_hits: dict[str, float] = {}
+        if vector_available() and bool(events):
+            try:
+                q_emb = await embed_text(query_text)
+                if q_emb:
+                    for hit in query_similar(q_emb, k=min(30, len(events) * 2)):
+                        t = hit.get("title", "")
+                        if t:
+                            vector_hits[t] = float(hit.get("similarity", 0.0))
+            except Exception as ve:
+                logger.debug(f"retrieve_evidence vector search failed: {ve}")
+
+        query_keywords = _expand_keywords(query_text)
+        for event in events:
+            title = event.get("title", "").lower()
+            content = event.get("content", "").lower()
+            company = event.get("company", "").lower() if event.get("company") else ""
+            if any(kw in title or kw in content or kw in company for kw in query_keywords):
+                matched_events.append(event)
+
+        if vector_hits:
+            seen = {e.get("title") for e in matched_events}
+            for event in events:
+                t = event.get("title", "")
+                if t in vector_hits and t not in seen and vector_hits[t] >= 0.55:
+                    matched_events.append(event)
+
+        seen_keys = set()
+        unique_matched = []
+        for event in matched_events:
+            key = (event.get("title"), event.get("source"))
+            if key not in seen_keys:
+                seen_keys.add(key)
+                unique_matched.append(event)
+        matched_events = unique_matched
+
+    return _to_evidence(matched_events)[:k]
