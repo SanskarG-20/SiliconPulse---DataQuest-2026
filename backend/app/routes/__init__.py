@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from ..graph.routes import router as graph_router
 from .auth import router as auth_router
 from .briefs import router as briefs_router
+from .comments import router as comments_router
 from .compare import router as compare_router
 from .diagnostics import router as diagnostics_router
 from .digest import router as digest_router
@@ -30,6 +31,7 @@ router.include_router(keys_router, prefix="", tags=["keys"])
 router.include_router(webhooks_router, prefix="", tags=["webhooks"])
 router.include_router(signals_router, prefix="", tags=["signals"])
 router.include_router(compare_router, prefix="", tags=["compare"])
+router.include_router(comments_router, prefix="", tags=["comments"])
 router.include_router(trends_router, prefix="", tags=["trends"])
 router.include_router(query_router, prefix="", tags=["query"])
 router.include_router(sources_router, prefix="/sources", tags=["sources"])

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Activity, AlertCircle } from 'lucide-react';
 import { fetchPublicBrief } from '../api/siliconpulseApi';
 import { StrategicInsightReport } from './StrategicInsightReport';
+import { BriefComments } from './BriefComments';
 import { BackgroundLayer } from './BackgroundLayer';
 
 export const PublicBrief: React.FC = () => {
@@ -75,6 +76,7 @@ export const PublicBrief: React.FC = () => {
                   </ul>
                 </div>
               )}
+              {id && <BriefComments briefId={id} />}
             </div>
           )}
         </div>

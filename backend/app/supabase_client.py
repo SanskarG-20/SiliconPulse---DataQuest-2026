@@ -503,6 +503,44 @@ def mark_webhook_sent(webhook_id: str) -> None:
         logger.debug(f"mark_webhook_sent failed for {webhook_id}: {exc}")
 
 
+def list_brief_comments(brief_id: str, limit: int = 50) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not brief_id:
+        return []
+    try:
+        resp = client.table("brief_comments").select("id,user_id,body,created_at").eq("brief_id", brief_id).order("created_at").limit(max(1, min(limit, 100))).execute()
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_brief_comments failed for {brief_id}: {exc}")
+        return []
+
+
+def add_brief_comment(brief_id: str, user_id: str, body: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not brief_id or not user_id:
+        return None
+    try:
+        resp = client.table("brief_comments").insert({"brief_id": brief_id, "user_id": user_id, "body": body[:2000]}).execute()
+        data = resp.data or []
+        return data[0] if data else None
+    except Exception as exc:
+        logger.debug(f"add_brief_comment failed for {brief_id}: {exc}")
+        return None
+
+
+def delete_brief_comment(comment_id: str, user_id: str) -> bool:
+    """Delete only if the row belongs to the user (service role bypasses RLS, so enforce here)."""
+    client = get_supabase_client()
+    if client is None or not comment_id or not user_id:
+        return False
+    try:
+        client.table("brief_comments").delete().eq("id", comment_id).eq("user_id", user_id).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"delete_brief_comment failed for {comment_id}: {exc}")
+        return False
+
+
 def insert_signal_record(
     user_id: str,
     source: str,

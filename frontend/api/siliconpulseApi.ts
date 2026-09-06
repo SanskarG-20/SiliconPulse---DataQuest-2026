@@ -648,6 +648,42 @@ export const testWebhook = async (url: string): Promise<boolean> => {
     }
 };
 
+export const fetchBriefComments = async (id: string): Promise<any[]> => {
+    try {
+        const base = BASE_URL.replace('/api', '');
+        const response = await fetch(`${base}/api/briefs/public/${encodeURIComponent(id)}/comments`);
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { comments: [] });
+        return Array.isArray((data as any)?.comments) ? (data as any).comments : [];
+    } catch {
+        return [];
+    }
+};
+
+export const postBriefComment = async (id: string, body: string): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/briefs/${encodeURIComponent(id)}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ body }),
+        });
+        if (!response.ok) return null;
+        const data = await parseJsonSafely(response, null);
+        return (data as any)?.comment || null;
+    } catch {
+        return null;
+    }
+};
+
+export const deleteBriefComment = async (commentId: string): Promise<boolean> => {
+    try {
+        const response = await apiFetch(`/comments/${encodeURIComponent(commentId)}`, { method: 'DELETE' });
+        return response.ok;
+    } catch {
+        return false;
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();

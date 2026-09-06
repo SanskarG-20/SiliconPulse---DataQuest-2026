@@ -286,6 +286,7 @@ Base URL locally `http://localhost:8000`; in prod via `VITE_API_BASE_URL`.
 | `GET/POST` | `/api/digest/prefs` | Clerk | — | Morning briefing schedule (`enabled`, `hour_utc`, `email`, `webhook_url`) |
 | `POST` | `/api/digest/send-now` | Clerk | `5/min` | Build fresh briefing now, optionally deliver (`{deliver}`) |
 | `GET/POST/DELETE` | `/api/keys`, `/api/keys/{id}` | Clerk | `10/min` on create | API keys for bots/CI (`sp_live_…`, hash-stored, shown once; use as `X-API-Key` or `?api_key=`) |
+| `GET/POST/DELETE` | `/api/briefs/public/:id/comments`, `/api/briefs/:id/comments`, `/api/comments/:id` | Public read, Clerk to post/delete own | `20/min` post | Brief annotations (plain-text thread on `/b/:id`, 2000 chars, own-delete only) |
 | `GET/POST/DELETE` | `/api/webhooks`, `/api/webhooks/{id}`, `POST /api/webhooks/test` | Clerk | `10/min` create, `5/min` test | Team Slack/Discord webhooks for spike alerts (allowlisted hosts, 1/day cap) |
 | `WS` | `/api/ws/signals?token=JWT` | Query JWT | — | Push on content hash change every 10s, `ping`→`pong`, close `4401` if auth fails |
 
@@ -492,6 +493,7 @@ Lint steps are non-blocking (`|| true`); typecheck and tests are blocking.
 - [x] Phase 2.2 comparison: head-to-head across 2–4 companies (`POST /api/compare`, shared `retrieval.py` helper, graph overlap + LLM verdict, `ComparePanel.tsx` collapsible in Dashboard)
 - [x] Phase 2.3 scheduled digest: morning briefing delivery (`GET/POST /api/digest/prefs`, `POST /api/digest/send-now`, `digest_service.py` Resend + Slack/Discord, hourly cron in `scheduler.py`, `DigestModal.tsx` schedule UI, Supabase `digest_prefs` + `003_digest.sql`)
 - [x] Phase 2.4 team integrations: API keys for bots/CI (`GET/POST/DELETE /api/keys`, `sp_live_…` hash-stored, `X-API-Key`/`?api_key=` fallback in `core/auth.py`) + team Slack/Discord webhooks for spike alerts (`GET/POST/DELETE /api/webhooks`, `POST /api/webhooks/test`, hourly `spike_alerts` cron with 1/day cap, `TeamIntegrations.tsx`, Supabase `api_keys`/`team_webhooks` + `004_integrations.sql`)
+- [x] Phase 3.1 brief annotations: discussion thread on shared briefs (public read on `/b/:id`, Clerk post, own-delete, `BriefComments.tsx`, Supabase `brief_comments` + `005_brief_comments.sql`)
 
 ---
 
