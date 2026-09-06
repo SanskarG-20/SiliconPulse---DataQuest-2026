@@ -1,13 +1,10 @@
 """Server-persisted watchlist + in-app alerts (Phase 1)."""
-from __future__ import annotations
-
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from ..core.auth import get_current_user
-from ..core.limiter import limiter
 from ..settings import settings
 from ..supabase_client import (
     add_watchlist_company,

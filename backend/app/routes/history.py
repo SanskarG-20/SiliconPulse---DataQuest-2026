@@ -1,6 +1,4 @@
 """Saved searches + query history (Phase 1). Reads existing queries/insights tables."""
-from __future__ import annotations
-
 import logging
 
 from fastapi import APIRouter, Depends

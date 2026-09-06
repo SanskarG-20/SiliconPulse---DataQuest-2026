@@ -1,6 +1,4 @@
 """Shareable brief links (Phase 1). Public read for is_public briefs."""
-from __future__ import annotations
-
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Request

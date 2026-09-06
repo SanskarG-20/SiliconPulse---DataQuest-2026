@@ -2,8 +2,10 @@ from fastapi import APIRouter
 
 from ..graph.routes import router as graph_router
 from .auth import router as auth_router
+from .briefs import router as briefs_router
 from .diagnostics import router as diagnostics_router
 from .export import router as export_router
+from .history import router as history_router
 from .ingest import router as ingest_router
 from .llm import router as llm_router
 from .query import router as query_router
@@ -12,8 +14,6 @@ from .signals import router as signals_router
 from .sources import router as sources_router
 from .videos import router as videos_router
 from .watchlist import router as watchlist_router
-from .briefs import router as briefs_router
-from .history import router as history_router
 
 router = APIRouter(dependencies=[])
 router.include_router(auth_router, prefix="/auth", tags=["auth"])
