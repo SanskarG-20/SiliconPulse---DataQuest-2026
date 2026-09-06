@@ -51,7 +51,7 @@ export const CustomSources: React.FC = () => {
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
           placeholder="https://example.com/feed.xml"
-          className="px-2.5 py-1.5 rounded-full bg-[#050B1A] border border-[#1C3553]/60 text-[12px] mono text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
+          className="px-2.5 py-1.5 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/60 text-[12px] mono text-slate-800 dark:text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
           aria-label="RSS feed URL"
         />
         <input
@@ -59,10 +59,10 @@ export const CustomSources: React.FC = () => {
           onChange={(e) => setLabel(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
           placeholder="Label (optional)"
-          className="px-2.5 py-1.5 rounded-full bg-[#050B1A] border border-[#1C3553]/60 text-[12px] text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
+          className="px-2.5 py-1.5 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/60 text-[12px] text-slate-800 dark:text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
           aria-label="Feed label"
         />
-        <button onClick={handleAdd} className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[11px] font-semibold text-[#94A3B8] hover:text-white transition-colors">
+          <button onClick={handleAdd} className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-[11px] font-semibold text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors">
           <Plus size={13} /> Add
         </button>
       </div>
@@ -70,7 +70,7 @@ export const CustomSources: React.FC = () => {
 
       <div className="flex items-center gap-2">
         <p className="mono text-[10px] tracking-[0.08em] text-[#475569]">SEC EDGAR 8-K runs daily automatically • RSS polls hourly</p>
-        <button onClick={handlePull} disabled={pulling} className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[10px] font-semibold uppercase tracking-[0.06em] text-[#94A3B8] hover:text-white transition-colors disabled:opacity-50">
+          <button onClick={handlePull} disabled={pulling} className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50">
           <RefreshCw size={11} className={pulling ? 'animate-spin' : ''} /> {pulling ? 'Pulling…' : 'Pull now'}
         </button>
       </div>
@@ -79,10 +79,10 @@ export const CustomSources: React.FC = () => {
       {feeds.length > 0 ? (
         <ul className="space-y-1.5">
           {feeds.map((f: any) => (
-            <li key={f.id} className="flex items-center gap-2 rounded-[10px] bg-[#050B1A] border border-[#1C3553]/40 px-2.5 py-2">
+            <li key={f.id} className="flex items-center gap-2 rounded-[10px] bg-white dark:bg-[#050B1A] border border-slate-200 dark:border-[#1C3553]/40 px-2.5 py-2">
               <Rss size={12} className={f.enabled ? 'text-[#22D3EE]' : 'text-[#334155]'} />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[12px] font-semibold text-[#E2E8F0]">{f.label || f.url}</span>
+                <span className="block truncate text-[12px] font-semibold text-slate-800 dark:text-[#E2E8F0]">{f.label || f.url}</span>
                 <span className="block truncate mono text-[10px] text-[#475569]">{f.url}{f.last_error ? ` • err: ${f.last_error.slice(0, 60)}` : ''}</span>
               </span>
               <button

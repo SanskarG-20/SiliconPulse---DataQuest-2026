@@ -32,7 +32,7 @@ export const VerifyModal: React.FC<VerifyModalProps> = ({
       <div className="w-full max-w-2xl bg-slate-50 dark:bg-[#020617] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative flex flex-col max-h-[80vh]">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors z-10"><X size={20} /></button>
         <div className="p-4 md:p-6 border-b border-slate-200/50 dark:border-slate-800/50 shrink-0">
-          <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
             <ShieldCheck size={20} className="mr-2 text-emerald-500" /> Source Verification
           </h3>
           <p className="text-xs text-slate-500 mt-2">Checking real-time credibility of retrieved intelligence across global databases.</p>
@@ -56,9 +56,9 @@ export const VerifyModal: React.FC<VerifyModalProps> = ({
                     <div key={idx} className="p-4 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 flex items-start justify-between">
                       <div className="flex-1 pr-4">
                         <div className="flex items-center space-x-2 mb-1">
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${trustLevel === 'High' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                            trustLevel === 'Medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                              'bg-red-500/10 text-red-500 border-red-500/20'
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border ${trustLevel === 'High' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25' :
+                            trustLevel === 'Medium' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25' :
+                              'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/25'
                             }`}>
                             {trustLevel} Trust
                           </span>
@@ -70,7 +70,7 @@ export const VerifyModal: React.FC<VerifyModalProps> = ({
                         <p className="text-xs text-slate-500 italic">{src.reason}</p>
                       </div>
                       {src.url && (
-                        <a href={src.url} target="_blank" rel="noreferrer" className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:bg-slate-700 transition-colors">
+                        <a href={src.url} target="_blank" rel="noreferrer" className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                           <ExternalLink size={16} />
                         </a>
                       )}

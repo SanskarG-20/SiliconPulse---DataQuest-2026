@@ -42,15 +42,15 @@ export const TrendsPanel: React.FC<TrendsPanelProps> = ({ company, days = 30, on
   const spikeDates = useMemo(() => new Set((data?.spikes || []).map((s: any) => s.date)), [data]);
 
   return (
-    <div className="rounded-[14px] border border-[#1C3553]/50 bg-[#0E1E32]/50 p-4 space-y-3">
+    <div className="rounded-[14px] border border-slate-200 dark:border-[#1C3553]/50 bg-white/70 dark:bg-[#0E1E32]/50 p-4 space-y-3">
       <div className="flex items-center gap-1.5">
-        <TrendingUp size={12} className="text-[#22D3EE]" />
-        <span className="mono text-[10px] font-semibold tracking-[0.12em] text-[#22D3EE]">SIGNAL TRENDS</span>
+        <TrendingUp size={12} className="text-[#0284C7] dark:text-[#22D3EE]" />
+        <span className="mono text-[10px] font-semibold tracking-[0.12em] text-[#0284C7] dark:text-[#22D3EE]">SIGNAL TRENDS</span>
         <span className="ml-auto mono text-[10px] tracking-[0.06em] text-[#475569]">{days}d{company ? ` • ${company}` : ''}</span>
       </div>
 
       {loading && !data ? (
-        <div className="h-[64px] rounded-[10px] bg-[#050B1A] border border-[#1C3553]/30 animate-pulse" />
+        <div className="h-[64px] rounded-[10px] bg-slate-100 dark:bg-[#050B1A] border border-slate-200 dark:border-[#1C3553]/30 animate-pulse" />
       ) : !data || data.total === 0 ? (
         <p className="text-[12px] leading-relaxed text-[#475569]">No signals in this window yet.</p>
       ) : (
@@ -70,7 +70,7 @@ export const TrendsPanel: React.FC<TrendsPanelProps> = ({ company, days = 30, on
             <div className="mt-1 flex items-center justify-between mono text-[10px] tracking-[0.06em] text-[#475569]">
               <span>{data.total} signals • avg {data.mean}/day</span>
               {(data.spikes || []).length > 0 && (
-                <span className="inline-flex items-center gap-1 font-bold text-[#E8A253]">
+                <span className="inline-flex items-center gap-1 font-bold text-[#B45309] dark:text-[#E8A253]">
                   <Flame size={11} /> {data.spikes.length} spike{data.spikes.length > 1 ? 's' : ''}
                 </span>
               )}
@@ -80,9 +80,9 @@ export const TrendsPanel: React.FC<TrendsPanelProps> = ({ company, days = 30, on
           {(data.spikes || []).length > 0 && (
             <ul className="space-y-1">
               {data.spikes.slice(0, 3).map((s: any) => (
-                <li key={s.date} className="flex items-center justify-between rounded-full bg-[#050B1A] border border-[#E8A253]/20 px-2.5 py-1">
-                  <span className="mono text-[10px] tracking-[0.06em] text-[#E8A253] font-bold">{s.date}</span>
-                  <span className="mono text-[10px] text-[#94A3B8]">{s.count} signals • z {s.z}</span>
+                <li key={s.date} className="flex items-center justify-between rounded-full bg-white dark:bg-[#050B1A] border border-[#E8A253]/25 px-2.5 py-1">
+                  <span className="mono text-[10px] tracking-[0.06em] text-[#B45309] dark:text-[#E8A253] font-bold">{s.date}</span>
+                  <span className="mono text-[10px] text-slate-500 dark:text-[#94A3B8]">{s.count} signals • z {s.z}</span>
                 </li>
               ))}
             </ul>
@@ -94,7 +94,7 @@ export const TrendsPanel: React.FC<TrendsPanelProps> = ({ company, days = 30, on
                 <button
                   key={c.company}
                   onClick={() => onCompanyClick?.(c.company)}
-                  className="px-2 py-1 rounded-full bg-[#050B1A] border border-[#1C3553]/40 text-[11px] font-medium text-[#CBD5E1] hover:text-white hover:border-[#22D3EE]/25 transition-colors"
+                  className="px-2 py-1 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/40 text-[11px] font-medium text-slate-700 dark:text-[#CBD5E1] hover:text-slate-900 dark:hover:text-white hover:border-[#22D3EE]/25 transition-colors"
                   title={`${c.count} signals`}
                 >
                   {c.company} <span className="mono text-[10px] text-[#475569]">{c.count}</span>

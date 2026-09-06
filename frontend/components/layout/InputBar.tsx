@@ -17,7 +17,7 @@ export const InputBar: React.FC<InputBarProps> = ({ query, onQueryChange, onSubm
       <div className="max-w-[760px] mx-auto space-y-2.5">
         <form onSubmit={onSubmit} className="relative group">
           <div className="absolute -inset-[1px] rounded-[16px] bg-gradient-to-r from-[#22D3EE]/0 via-[#22D3EE]/20 to-[#E8A253]/20 opacity-0 group-focus-within:opacity-100 blur-[8px] transition-opacity duration-300 pointer-events-none" />
-          <div className="relative flex items-center gap-2 bg-[#0E1E32] border border-[#1C3553] rounded-[16px] px-3 md:px-4 py-2 shadow-[0_8px_24px_rgba(2,8,23,0.4)] focus-within:border-[#22D3EE]/40 focus-within:shadow-[0_0_0_3px_rgba(34,211,238,0.12)] transition-all">
+          <div className="relative flex items-center gap-2 bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] rounded-[16px] px-3 md:px-4 py-2 shadow-[0_8px_24px_rgba(2,8,23,0.12)] dark:shadow-[0_8px_24px_rgba(2,8,23,0.4)] focus-within:border-[#22D3EE]/40 focus-within:shadow-[0_0_0_3px_rgba(34,211,238,0.12)] transition-all">
             <Search className="text-[#475569] hidden sm:block shrink-0" size={16} />
             <input
               type="text"
@@ -43,7 +43,7 @@ export const InputBar: React.FC<InputBarProps> = ({ query, onQueryChange, onSubm
         <div className="flex items-center justify-between px-1 mono text-[10px] tracking-[0.08em]">
           <span className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-[#64748B]">
-              <Clock size={11} /> FRESH <span className="text-[#22D3EE]">{lastUpdate}</span>
+              <Clock size={11} /> FRESH <span className="text-[#0284C7] dark:text-[#22D3EE]">{lastUpdate}</span>
             </span>
             <span className="hidden sm:inline-flex items-center gap-1.5 text-slate-500 dark:text-[#64748B]">
               <TrendingUp size={11} className="text-emerald-400" /> ACTIVE <span className="text-emerald-400">{activeCount}</span>

@@ -11,28 +11,28 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen flex flex-col text-slate-800 dark:text-[#F1F5F9] relative">
       <BackgroundLayer />
 
-      <header className="h-[56px] border-b border-[#1C3553]/50 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-[#050B1A]/70 backdrop-blur-xl">
+      <header className="h-[56px] border-b border-slate-200/70 dark:border-[#1C3553]/50 flex items-center justify-between px-4 md:px-6 bg-white/70 dark:bg-[#050B1A]/70 backdrop-blur-xl">
         <div className="flex items-center gap-2.5">
           <span className="w-8 h-8 rounded-[8px] bg-[#0E1E32] border border-[#1C3553] flex items-center justify-center">
             <span className="w-[18px] h-[18px] rounded-[5px] bg-[#22D3EE] flex items-center justify-center">
               <Activity size={11} className="text-[#050B1A]" strokeWidth={2.5} />
             </span>
           </span>
-          <span className="display text-[13px] font-bold tracking-[-0.02em] text-white">
-            SILICON<span className="text-[#22D3EE]">PULSE</span>
+          <span className="display text-[13px] font-bold tracking-[-0.02em] text-slate-900 dark:text-white">
+            SILICON<span className="text-[#0284C7] dark:text-[#22D3EE]">PULSE</span>
           </span>
-          <span className="hidden sm:inline-flex mono text-[9px] tracking-[0.14em] text-[#475569] border border-[#1C3553]/50 rounded-full px-2 py-0.5 bg-[#0E1E32]">RETICLE OK</span>
+          <span className="hidden sm:inline-flex mono text-[9px] tracking-[0.14em] text-[#475569] border border-slate-300 dark:border-[#1C3553]/50 rounded-full px-2 py-0.5 bg-slate-100 dark:bg-[#0E1E32]">RETICLE OK</span>
         </div>
 
         <div className="flex items-center gap-2">
           <SignedIn>
-            <Link to="/dashboard" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[11px] font-semibold tracking-[0.04em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:border-[#22D3EE]/30 transition-colors">
+            <Link to="/dashboard" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-[11px] font-semibold tracking-[0.04em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:border-[#22D3EE]/30 transition-colors">
               Dashboard <ArrowRight size={12} />
             </Link>
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <SignedOut>
-            <Link to="/sign-in" className="px-3 py-1.5 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[11px] font-semibold tracking-[0.04em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors">
+            <Link to="/sign-in" className="px-3 py-1.5 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-[11px] font-semibold tracking-[0.04em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors">
               Sign in
             </Link>
             <Link to="/sign-up" className="px-3.5 py-1.5 rounded-full bg-[#E8A253] text-[#050B1A] text-[11px] font-bold tracking-[0.04em] hover:bg-[#F0A85E] shadow-[0_0_14px_rgba(232,162,83,0.28)] transition-colors">
@@ -45,13 +45,13 @@ const HomePage: React.FC = () => {
       <main className="flex-1 flex items-center justify-center px-4 md:px-6 py-10 md:py-16">
         <div className="w-full max-w-[980px] grid md:grid-cols-[1.15fr_0.85fr] gap-8 md:gap-10 items-center">
           <div className="space-y-5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#22D3EE]/10 border border-[#22D3EE]/15 text-[#22D3EE] mono text-[10px] font-semibold tracking-[0.1em]">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#22D3EE]/10 border border-[#22D3EE]/15 text-[#0284C7] dark:text-[#22D3EE] mono text-[10px] font-semibold tracking-[0.1em]">
               <Zap size={12} /> SIGNAL-FIRST INTELLIGENCE
             </span>
-            <h1 className="display text-[36px] md:text-[52px] font-bold leading-[0.9] tracking-[-0.04em] text-white">
+            <h1 className="display text-[36px] md:text-[52px] font-bold leading-[0.9] tracking-[-0.04em] text-slate-900 dark:text-white">
               Intelligence
               <br />
-              <span className="text-[#22D3EE]">for the</span> silicon
+              <span className="text-[#0284C7] dark:text-[#22D3EE]">for the</span> silicon
               <br />
               stack.
             </h1>
@@ -68,23 +68,23 @@ const HomePage: React.FC = () => {
                 <Link to="/sign-up" className="inline-flex items-center gap-1.5 px-5 py-3 rounded-full bg-[#E8A253] text-[#050B1A] text-[12px] font-bold tracking-[0.04em] hover:bg-[#F0A85E] shadow-[0_0_18px_rgba(232,162,83,0.3)] transition-colors">
                   Get started <ArrowRight size={14} />
                 </Link>
-                <Link to="/sign-in" className="px-5 py-3 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[#CBD5E1] text-[12px] font-semibold tracking-[0.04em] hover:border-[#22D3EE]/30 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <Link to="/sign-in" className="px-5 py-3 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-slate-700 dark:text-[#CBD5E1] text-[12px] font-semibold tracking-[0.04em] hover:border-[#22D3EE]/30 hover:text-slate-900 dark:hover:text-white transition-colors">
                   Sign in
                 </Link>
               </SignedOut>
             </div>
             <div className="flex flex-wrap gap-2 mono text-[10px] tracking-[0.08em] text-[#475569] pt-1">
-              <span className="px-2 py-1 rounded-full bg-[#0E1E32] border border-[#1C3553]/60">HYBRID VECTOR ≥0.72</span>
-              <span className="px-2 py-1 rounded-full bg-[#0E1E32] border border-[#1C3553]/60">GRAPH RAG 19 EDGES</span>
-              <span className="px-2 py-1 rounded-full bg-[#0E1E32] border border-[#1C3553]/60 hidden sm:inline">E2E VERIFIED</span>
+              <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553]/60">HYBRID VECTOR ≥0.72</span>
+              <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553]/60">GRAPH RAG 19 EDGES</span>
+              <span className="px-2 py-1 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553]/60 hidden sm:inline">E2E VERIFIED</span>
             </div>
           </div>
 
-          <div className="relative rounded-[20px] border border-[#1C3553]/50 bg-[#0E1E32]/40 p-4 md:p-5 blueprint-grid overflow-hidden">
+          <div className="relative rounded-[20px] border border-slate-200 dark:border-[#1C3553]/50 bg-white/60 dark:bg-[#0E1E32]/40 p-4 md:p-5 blueprint-grid overflow-hidden">
             <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{ background: 'radial-gradient(circle at 70% 20%, #E8A253 1px, transparent 1.6px)', backgroundSize: '18px 18px' }} />
             <div className="relative rounded-[14px] border border-[#1C3553]/40 bg-white dark:bg-[#050B1A]/80 p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="mono text-[10px] tracking-[0.1em] font-semibold text-[#22D3EE]">LIVE RETICLE • TSMC N2</span>
+                <span className="mono text-[10px] tracking-[0.1em] font-semibold text-[#0284C7] dark:text-[#22D3EE]">LIVE RETICLE • TSMC N2</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" />
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -93,19 +93,19 @@ const HomePage: React.FC = () => {
                   { k: 'WIP', v: '12.4k', sub: 'wafers' },
                   { k: 'HBM', v: 'Short', sub: '−12% cap' },
                 ].map((s) => (
-                  <div key={s.k} className="rounded-[12px] bg-[#0E1E32] border border-[#1C3553]/40 p-2.5">
+                  <div key={s.k} className="rounded-[12px] bg-slate-100 dark:bg-[#0E1E32] border border-slate-200 dark:border-[#1C3553]/40 p-2.5">
                     <p className="mono text-[9px] tracking-[0.1em] font-semibold text-slate-500 dark:text-[#64748B]">{s.k}</p>
-                    <p className="display text-[16px] font-bold tracking-[-0.02em] text-white leading-none mt-1">{s.v}</p>
+                    <p className="display text-[16px] font-bold tracking-[-0.02em] text-slate-900 dark:text-white leading-none mt-1">{s.v}</p>
                     <p className="mono text-[10px] text-slate-500 dark:text-[#64748B] mt-1">{s.sub}</p>
                   </div>
                 ))}
               </div>
-              <div className="rounded-[10px] bg-[#0E1E32] border border-[#1C3553]/30 p-3 flex items-center gap-2.5">
+              <div className="rounded-[10px] bg-slate-100 dark:bg-[#0E1E32] border border-slate-200 dark:border-[#1C3553]/30 p-3 flex items-center gap-2.5">
                 <span className="w-7 h-7 rounded-[8px] bg-[#E8A253]/10 border border-[#E8A253]/15 flex items-center justify-center shrink-0">
-                  <FileText size={13} className="text-[#E8A253]" />
+                  <FileText size={13} className="text-[#B45309] dark:text-[#E8A253]" />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[12px] font-semibold leading-tight text-[#E2E8F0] truncate">TSMC N2 yield hits 90% ahead of Apple ramp</p>
+                    <p className="text-[12px] font-semibold leading-tight text-slate-800 dark:text-[#E2E8F0] truncate">TSMC N2 yield hits 90% ahead of Apple ramp</p>
                   <p className="mono text-[10px] tracking-[0.06em] text-slate-500 dark:text-[#64748B]">CoWoS • N3 → N2 • 2h ago</p>
                 </div>
               </div>
@@ -121,8 +121,8 @@ const HomePage: React.FC = () => {
                 { title: 'Graph RAG', desc: 'ASML → TSMC → NVIDIA' },
                 { title: 'Verified', desc: 'Trust • provenance' },
               ].map((f) => (
-                <div key={f.title} className="rounded-[12px] bg-white dark:bg-[#050B1A]/60 border border-[#1C3553]/30 p-2.5">
-                  <p className="display text-[10px] font-semibold tracking-[0.08em] text-white">{f.title}</p>
+                <div key={f.title} className="rounded-[12px] bg-white dark:bg-[#050B1A]/60 border border-slate-200 dark:border-[#1C3553]/30 p-2.5">
+                  <p className="display text-[10px] font-semibold tracking-[0.08em] text-slate-900 dark:text-white">{f.title}</p>
                   <p className="mt-1 text-[11px] leading-snug text-slate-500 dark:text-[#64748B]">{f.desc}</p>
                 </div>
               ))}

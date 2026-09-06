@@ -23,11 +23,14 @@
             --copper: #D97706; /* Darker amber for contrast */
             --copper-soft: rgba(217,119,6,0.14);
             --signal: #0F172A;
+            --body: #334155;
             --muted: #64748B;
+            --input-bg: #FFFFFF;
             --grid: rgba(2,132,199,0.06);
             --radius: 16px;
+            color-scheme: light;
         }
-        
+
         html.dark {
             /* Dark Mode Variables (Default) */
             --void: #050B1A;
@@ -40,8 +43,11 @@
             --copper: #E8A253;
             --copper-soft: rgba(232,162,83,0.14);
             --signal: #F1F5F9;
+            --body: #CBD5E1;
             --muted: #94A3B8;
+            --input-bg: #050B1A;
             --grid: rgba(34,211,238,0.06);
+            color-scheme: dark;
         }
 
         html { scrollbar-width: thin; scrollbar-color: var(--hairline) transparent; }
@@ -73,6 +79,51 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px var(--euv-soft);
         }
         .hairline { border-color: var(--hairline-soft); }
+
+        /* Semantic theme primitives — use these for all new components
+           so Light/Dark inherit automatically instead of one-off overrides. */
+        .t-primary { color: var(--signal); }
+        .t-body { color: var(--body); }
+        .t-muted { color: var(--muted); }
+        .panel {
+            background: var(--panel-soft);
+            border: 1px solid var(--hairline-soft);
+            backdrop-filter: blur(14px) saturate(1.1);
+        }
+        .panel-solid {
+            background: var(--panel);
+            border: 1px solid var(--hairline-soft);
+        }
+        .well { background: var(--input-bg); border: 1px solid var(--hairline-soft); }
+        .field {
+            background: var(--input-bg);
+            border: 1px solid var(--hairline);
+            color: var(--signal);
+        }
+        .field::placeholder { color: var(--muted); opacity: 0.75; }
+        .btn-ghost {
+            background: var(--panel);
+            border: 1px solid var(--hairline);
+            color: var(--muted);
+            transition: color 150ms, border-color 150ms, background 150ms;
+        }
+        .btn-ghost:hover { color: var(--signal); border-color: var(--euv); }
+
+        /* Theme-aware scene (Backdrop) — replaces hardcoded dark gradients */
+        .scene-vignette {
+            background:
+                radial-gradient(900px 600px at 20% -10%, rgba(2,132,199,0.10), transparent 60%),
+                radial-gradient(700px 500px at 90% 110%, rgba(217,119,6,0.08), transparent 60%),
+                radial-gradient(600px 400px at 50% 50%, #FFFFFF 0%, #EDF2F7 70%);
+        }
+        html.dark .scene-vignette {
+            background:
+                radial-gradient(900px 600px at 20% -10%, rgba(34,211,238,0.08), transparent 60%),
+                radial-gradient(700px 500px at 90% 110%, rgba(232,162,83,0.07), transparent 60%),
+                radial-gradient(600px 400px at 50% 50%, #0E1E32 0%, #050B1A 70%);
+        }
+        .scene-reticle { border-color: var(--hairline); }
+        .scene-ring { border-color: var(--hairline-soft); }
         
         /* Focus */
         :where(a, button, input, select, textarea):focus-visible {
@@ -121,6 +172,19 @@
         tailwind.config = {
             darkMode: 'class'
         }
+    </script>
+    <script>
+        /* Pre-paint theme init: single source of truth with useDashboard.
+           Prevents stale first paint (dark shell flashing before light applies). */
+        try {
+            var t = localStorage.getItem('siliconpulse_theme');
+            if (t !== 'light' && t !== 'dark') {
+                t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+            }
+            if (t === 'light') document.documentElement.classList.remove('dark');
+            else document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = t;
+        } catch (e) { document.documentElement.classList.add('dark'); }
     </script>
 </head>
 <body>

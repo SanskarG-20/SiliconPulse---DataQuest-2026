@@ -19,10 +19,10 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
           return (
             <div key={idx} className="border-b border-slate-200 dark:border-slate-800 pb-6 mb-8">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black text-sky-500 uppercase tracking-widest">Strategic Intelligence Report</span>
+                <span className="text-[10px] font-black text-sky-600 dark:text-sky-500 uppercase tracking-widest">Strategic Intelligence Report</span>
                 <span className="text-[10px] font-mono text-slate-600 uppercase">Classified / Internal Use</span>
               </div>
-              <h2 className="text-3xl font-black text-white tracking-tight leading-none uppercase">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none uppercase">
                 {line.replace('≡ƒƒª ', '')}
               </h2>
             </div>
@@ -37,8 +37,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                      line.startsWith('≡ƒÄ»') ? BarChart3 : ShieldAlert;
 
           return (
-            <h3 key={idx} className="flex items-center text-xs font-black text-slate-500 uppercase tracking-[0.2em] mt-10 mb-4 pt-4 border-t border-slate-900">
-              <Icon size={14} className="mr-2 text-sky-500" />
+              <h3 key={idx} className="flex items-center text-xs font-black text-slate-500 uppercase tracking-[0.2em] mt-10 mb-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+               <Icon size={14} className="mr-2 text-sky-600 dark:text-sky-500" />
               {title}
             </h3>
           );
@@ -62,7 +62,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                <div className="absolute top-0 right-0 p-3 opacity-10">
                  <Cpu size={80} />
                </div>
-               <span className="font-black text-[9px] uppercase tracking-[0.3em] text-sky-500 block mb-2">Executive Summary</span>
+                <span className="font-black text-[9px] uppercase tracking-[0.3em] text-sky-600 dark:text-sky-500 block mb-2">Executive Summary</span>
                <p className="text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug relative z-10">
                  {line.replace('CEO Summary:', '').trim()}
                </p>
@@ -84,7 +84,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                     ></div>
                   </div>
                 </div>
-                <span className="text-white font-black font-mono text-sm">{score}%</span>
+                <span className="text-slate-900 dark:text-white font-black font-mono text-sm">{score}%</span>
               </div>
             )
         }
@@ -103,7 +103,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         if (trimmed.startsWith('(A)') || trimmed.startsWith('(B)') || trimmed.startsWith('(C)')) {
           return (
             <div key={idx} className="ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 py-1 mb-2">
-               <span className="text-sky-500 font-bold mr-2 text-sm">{trimmed.substring(0, 3)}</span>
+                <span className="text-sky-600 dark:text-sky-500 font-bold mr-2 text-sm">{trimmed.substring(0, 3)}</span>
                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{trimmed.substring(3).trim()}</span>
             </div>
           )

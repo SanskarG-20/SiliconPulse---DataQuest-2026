@@ -31,7 +31,7 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ events }) => {
             <span key={`${event.id}-${idx}`} className="inline-flex items-center gap-2.5 px-6 border-r border-[#1C3553]/30 last:border-0">
               <span className="mono text-[10px] tracking-[0.06em] text-[#475569]">{getRelativeTimeLabel(event.timestamp)}</span>
               <span className="w-1 h-1 rounded-full bg-[#E8A253]/60" />
-              <span title={event.title} className="text-[12px] font-medium tracking-tight text-[#E2E8F0] max-w-[320px] truncate">
+              <span title={event.title} className="text-[12px] font-medium tracking-tight text-slate-800 dark:text-[#E2E8F0] max-w-[320px] truncate">
                 {event.title || 'Untitled Signal'}
               </span>
               <SourceBadge source={event.source} size="sm" />

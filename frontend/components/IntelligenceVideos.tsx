@@ -108,11 +108,11 @@ export const IntelligenceVideos: React.FC<IntelligenceVideosProps> = ({ lastSubm
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded transition-colors ${
-                  activeCategory === cat.id
-                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
-                    : 'bg-slate-50/50 dark:bg-slate-900/50 text-slate-500 hover:text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:bg-slate-800'
-                }`}
+                  className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded border transition-colors ${
+                    activeCategory === cat.id
+                      ? 'bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/40'
+                      : 'bg-slate-50/50 dark:bg-slate-900/50 text-slate-500 hover:text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent'
+                  }`}
               >
                 {cat.label}
               </button>
@@ -121,7 +121,7 @@ export const IntelligenceVideos: React.FC<IntelligenceVideosProps> = ({ lastSubm
             <button
               onClick={() => loadVideos(lastSubmittedQuery, activeCategory)}
               disabled={loading}
-              className="text-slate-500 hover:text-sky-400 transition-colors p-1"
+              className="text-slate-500 hover:text-sky-600 dark:hover:text-sky-400 transition-colors p-1"
               title="Refresh Videos"
             >
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -131,7 +131,7 @@ export const IntelligenceVideos: React.FC<IntelligenceVideosProps> = ({ lastSubm
           {error && !loading && (
             <div className="rounded-xl border border-red-500/15 bg-red-500/[0.06] p-4 flex items-center justify-center space-x-2">
               <AlertCircle size={16} className="text-red-400" />
-              <span className="text-red-300 text-xs font-bold uppercase tracking-widest">
+              <span className="text-red-700 dark:text-red-300 text-xs font-bold uppercase tracking-widest">
                 Video feed temporarily unavailable.
               </span>
               <button 
@@ -176,7 +176,7 @@ export const IntelligenceVideos: React.FC<IntelligenceVideosProps> = ({ lastSubm
                     </div>
                   </div>
                   <div className="p-3 flex-1 flex flex-col">
-                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight mb-2 group-hover:text-sky-100">
+                    <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-100">
                       {video.title}
                     </h4>
                     <div className="mt-auto flex items-center justify-between text-[10px] text-slate-500 font-medium">

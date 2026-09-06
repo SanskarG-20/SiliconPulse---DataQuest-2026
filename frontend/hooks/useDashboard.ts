@@ -151,11 +151,14 @@ export const useDashboard = (): UseDashboardReturn => {
   });
 
   useEffect(() => {
+    // Single writer for theme DOM state (mirrors the pre-paint init in index.html).
     if (isLightMode) {
       document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
       localStorage.setItem('siliconpulse_theme', 'light');
     } else {
       document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
       localStorage.setItem('siliconpulse_theme', 'dark');
     }
   }, [isLightMode]);

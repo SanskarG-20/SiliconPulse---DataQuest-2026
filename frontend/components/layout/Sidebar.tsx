@@ -31,7 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ feed, watchlist, onCompanyClic
   }, [watchlist.length]);
 
   return (
-    <aside className="w-[300px] shrink-0 border-r border-[#1C3553]/40 bg-[#0B1426]/50 backdrop-blur-[6px] p-4 space-y-5 hidden lg:flex lg:flex-col overflow-y-auto custom-scrollbar">
+    <aside className="w-[300px] shrink-0 border-r border-slate-200/70 dark:border-[#1C3553]/40 bg-white/60 dark:bg-[#0B1426]/50 backdrop-blur-[6px] p-4 space-y-5 hidden lg:flex lg:flex-col overflow-y-auto custom-scrollbar">
       <CompanyRadar onCompanyClick={onCompanyClick} watchlist={watchlist} onToggleWatchlist={onToggleWatchlist} />
 
       {watchlist.length > 0 && (
@@ -42,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ feed, watchlist, onCompanyClic
 
       <div className="space-y-3">
         <h3 className="display text-[10px] font-semibold tracking-[0.14em] text-slate-500 dark:text-[#64748B] flex items-center gap-1.5">
-          <Zap size={12} className="text-[#E8A253]" />
+          <Zap size={12} className="text-[#B45309] dark:text-[#E8A253]" />
           HIGH PRIORITY
         </h3>
         <div className="space-y-2.5">
@@ -53,13 +53,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ feed, watchlist, onCompanyClic
               <button
                 key={ev.id}
                 onClick={() => onCompanyClick(ev.company)}
-                className="w-full text-left glass rounded-[14px] p-3 border-[#1C3553]/40 hover:border-[#22D3EE]/25 hover:bg-[#0E1E32]/80 transition-all group"
+                className="w-full text-left glass rounded-[14px] p-3 border-[#1C3553]/40 hover:border-[#22D3EE]/25 hover:bg-slate-200/70 dark:hover:bg-[#0E1E32]/80 transition-all group"
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="mono text-[10px] tracking-[0.06em] text-[#22D3EE]">{getRelativeTimeLabel(ev.timestamp)}</span>
+                  <span className="mono text-[10px] tracking-[0.06em] text-[#0284C7] dark:text-[#22D3EE]">{getRelativeTimeLabel(ev.timestamp)}</span>
                   <span className="px-1.5 py-0.5 rounded-[6px] bg-red-500/10 text-red-400 text-[9px] font-bold tracking-[0.08em] border border-red-500/15">CRITICAL</span>
                 </div>
-                <h4 title={ev.title} className="text-[12.5px] font-semibold leading-snug text-[#E2E8F0] group-hover:text-slate-900 dark:hover:text-white line-clamp-2">
+                <h4 title={ev.title} className="text-[12.5px] font-semibold leading-snug text-slate-800 dark:text-[#E2E8F0] group-hover:text-slate-900 dark:group-hover:text-white line-clamp-2">
                   {ev.title}
                 </h4>
                 <div className="mt-1.5 flex items-center gap-1.5 mono text-[10px] tracking-[0.06em] text-slate-500 dark:text-[#64748B]">
@@ -93,12 +93,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ feed, watchlist, onCompanyClic
         </div>
       </div>
 
-      <div className="rounded-[14px] bg-[#0E1E32] border border-[#1C3553]/50 p-4">
+      <div className="rounded-[14px] bg-slate-100 dark:bg-[#0E1E32] border border-slate-200 dark:border-[#1C3553]/50 p-4">
         <div className="flex items-center gap-2 mb-2.5">
           <span className="w-6 h-6 rounded-[8px] bg-[#22D3EE]/10 border border-[#22D3EE]/15 flex items-center justify-center">
-            <ShieldAlert size={13} className="text-[#22D3EE]" />
+            <ShieldAlert size={13} className="text-[#0284C7] dark:text-[#22D3EE]" />
           </span>
-          <span className="display text-[10px] font-semibold tracking-[0.12em] text-[#22D3EE]">ANALYST ADVISORY</span>
+          <span className="display text-[10px] font-semibold tracking-[0.12em] text-[#0284C7] dark:text-[#22D3EE]">ANALYST ADVISORY</span>
         </div>
         <p className="serif text-[12.5px] leading-relaxed text-slate-600 dark:text-[#94A3B8] italic">
           “Focus on TSMC N2 yield milestones. Early reports suggest Apple/NVIDIA bidding war for initial capacity. Cross-ref with GlobalFoundries delays.”

@@ -45,7 +45,7 @@ export const InjectModal: React.FC<InjectModalProps> = ({
             <div className="p-2 bg-sky-500/10 rounded-lg text-sky-500">
               <Zap size={20} />
             </div>
-            <h3 className="text-lg font-black text-white uppercase tracking-tight">Inject Signal</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Inject Signal</h3>
           </div>
         </div>
 
@@ -54,7 +54,7 @@ export const InjectModal: React.FC<InjectModalProps> = ({
             <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-500 mb-2">
               <CheckCircle2 size={32} />
             </div>
-            <h4 className="text-xl font-bold text-white">Signal Injected</h4>
+            <h4 className="text-xl font-bold text-slate-900 dark:text-white">Signal Injected</h4>
             <p className="text-slate-600 dark:text-slate-400 text-sm">Data stream updated successfully.</p>
           </div>
         ) : (
@@ -65,7 +65,7 @@ export const InjectModal: React.FC<InjectModalProps> = ({
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/50 outline-none transition-all"
+                className="w-full bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/50 outline-none transition-all"
                 placeholder="e.g. TSMC Yield Report"
                 required
               />
@@ -77,7 +77,7 @@ export const InjectModal: React.FC<InjectModalProps> = ({
                 type="text"
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/50 outline-none transition-all"
+                className="w-full bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/50 outline-none transition-all"
                 placeholder="e.g. ManualInject"
               />
             </div>
@@ -87,7 +87,7 @@ export const InjectModal: React.FC<InjectModalProps> = ({
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-sm text-white focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/50 outline-none transition-all h-32 resize-none"
+                className="w-full bg-slate-50/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/50 outline-none transition-all h-32 resize-none"
                 placeholder="Enter raw signal data..."
                 required
               />

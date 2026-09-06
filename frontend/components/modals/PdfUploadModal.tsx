@@ -98,7 +98,7 @@ export const PdfUploadModal: React.FC<PdfUploadModalProps> = ({ isOpen, onClose,
               <Upload size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-widest">Ingest PDF / SEC</h3>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Ingest PDF / SEC</h3>
               <p className="text-[11px] text-slate-500">Earnings reports, 8-K filings → LLM extraction → live feed</p>
             </div>
           </div>

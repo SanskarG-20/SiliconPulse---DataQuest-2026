@@ -44,9 +44,9 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
 
   if (!company) {
     return (
-      <div className="rounded-[14px] border border-[#1C3553]/40 bg-[#0E1E32]/60 p-4">
+      <div className="rounded-[14px] border border-slate-200 dark:border-[#1C3553]/40 bg-white/70 dark:bg-[#0E1E32]/60 p-4">
         <div className="flex items-center gap-1.5 mono text-[10px] font-semibold tracking-[0.12em] text-slate-500 dark:text-[#64748B]">
-          <Network size={12} className="text-[#22D3EE]" />
+          <Network size={12} className="text-[#0284C7] dark:text-[#22D3EE]" />
           SUPPLY-CHAIN GRAPH
         </div>
         <p className="mt-2 text-[12px] leading-relaxed text-slate-500 dark:text-[#64748B]">Select a company from the feed or the explorer to see upstream and downstream.</p>
@@ -55,8 +55,8 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
   }
 
   return (
-    <div className="rounded-[14px] border border-[#1C3553]/50 bg-[#0E1E32]/50 p-4 space-y-4">
-      <div className="flex items-center gap-1.5 mono text-[10px] font-semibold tracking-[0.12em] text-[#22D3EE]">
+    <div className="rounded-[14px] border border-slate-200 dark:border-[#1C3553]/50 bg-white/70 dark:bg-[#0E1E32]/50 p-4 space-y-4">
+      <div className="flex items-center gap-1.5 mono text-[10px] font-semibold tracking-[0.12em] text-[#0284C7] dark:text-[#22D3EE]">
         <Network size={12} />
         GRAPH RAG — {company}
         {loading && <span className="ml-1 text-[#475569] animate-pulse">loading…</span>}
@@ -76,7 +76,7 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
                   .slice(0, 4)
                   .map(([k, v]: any) => (
                     <li key={k} className="flex items-center justify-between rounded-full bg-white dark:bg-[#050B1A] border border-[#1C3553]/40 px-2.5 py-1">
-                      <span className="text-[12px] font-semibold text-[#22D3EE]">{k}</span>
+                      <span className="text-[12px] font-semibold text-[#0284C7] dark:text-[#22D3EE]">{k}</span>
                       <span className="mono text-[10px] tracking-[0.06em] text-[#475569]">score {v.score}</span>
                     </li>
                   ))}
@@ -96,7 +96,7 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
                   .slice(0, 4)
                   .map(([k, v]: any) => (
                     <li key={k} className="flex items-center justify-between rounded-full bg-white dark:bg-[#050B1A] border border-[#1C3553]/40 px-2.5 py-1">
-                      <span className="text-[12px] font-semibold text-[#E8A253]">{k}</span>
+                      <span className="text-[12px] font-semibold text-[#B45309] dark:text-[#E8A253]">{k}</span>
                       <span className="mono text-[10px] tracking-[0.06em] text-[#475569]">score {v.score}</span>
                     </li>
                   ))}
@@ -110,11 +110,11 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
           </details>
 
           <div className="rounded-[14px] border border-[#E8A253]/15 bg-[#E8A253]/[0.06] p-3 space-y-3">
-            <p className="flex items-center gap-1.5 mono text-[10px] font-bold tracking-[0.12em] text-[#E8A253]">
+            <p className="flex items-center gap-1.5 mono text-[10px] font-bold tracking-[0.12em] text-[#B45309] dark:text-[#E8A253]">
               <Zap size={12} /> SCENARIO — WHAT IF?
             </p>
             <div className="flex items-center gap-2">
-              <select value={metric} onChange={(e) => setMetric(e.target.value)} className="rounded-full bg-white dark:bg-[#050B1A] border border-[#1C3553] px-2.5 py-1 text-[11px] font-medium text-[#CBD5E1] focus:border-[#E8A253]/30 focus:outline-none">
+              <select value={metric} onChange={(e) => setMetric(e.target.value)} className="rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553] px-2.5 py-1 text-[11px] font-medium text-slate-700 dark:text-[#CBD5E1] focus:border-[#E8A253]/30 focus:outline-none">
                 <option value="yield">Yield</option>
                 <option value="capacity">Capacity</option>
                 <option value="supply">Supply</option>
@@ -142,7 +142,7 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
             </button>
             {simData && (
               <div className="space-y-2 pt-2 border-t border-[#E8A253]/15">
-                <p className="text-[11px] font-semibold text-[#E8A253]">Impact: {simData.company} {shock}% {metric}</p>
+                <p className="text-[11px] font-semibold text-[#B45309] dark:text-[#E8A253]">Impact: {simData.company} {shock}% {metric}</p>
                 <p className="mono text-[10px] leading-relaxed text-slate-500 dark:text-[#64748B] line-clamp-3">{simData.impact_text?.slice(0, 280)}</p>
                 {simData.impact && Object.keys(simData.impact).length > 0 && (
                   <ul className="space-y-1">
@@ -150,7 +150,7 @@ export const GraphPanel: React.FC<{ company?: string }> = ({ company }) => {
                       .slice(0, 4)
                       .map(([k, v]: any) => (
                         <li key={k} className="flex items-center justify-between rounded-full bg-white dark:bg-[#050B1A] border border-[#1C3553]/40 px-2.5 py-1">
-                          <span className="text-[11px] font-semibold text-[#E2E8F0]">{k}</span>
+                          <span className="text-[11px] font-semibold text-slate-800 dark:text-[#E2E8F0]">{k}</span>
                           <span className={`mono text-[10px] font-bold ${v.severity === 'High' ? 'text-red-400' : v.severity === 'Medium' ? 'text-[#E8A253]' : 'text-emerald-400'}`}>
                             {v.delta > 0 ? '+' : ''}
                             {v.delta} • ${v.est_impact_usd_m}M

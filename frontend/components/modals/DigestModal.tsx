@@ -72,7 +72,7 @@ export const DigestModal: React.FC<DigestModalProps> = ({ isOpen, onClose, loadi
           <X size={20} />
         </button>
         <div className="p-4 md:p-6 border-b border-slate-200/50 dark:border-slate-800/50">
-          <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
             <Coffee size={20} className="mr-2 text-emerald-500" /> Morning Briefing
           </h3>
         </div>
@@ -134,7 +134,7 @@ export const DigestModal: React.FC<DigestModalProps> = ({ isOpen, onClose, loadi
               <button
                 onClick={handleSendNow}
                 disabled={sending}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[11px] font-semibold text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-[11px] font-semibold text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
               >
                 <Send size={13} /> {sending ? 'Sending…' : 'Build & deliver now'}
               </button>

@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertCircle size={32} />
             </div>
             <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-tighter mb-2">System Failure</h2>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-2">System Failure</h2>
               <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                 The frontend node encountered a critical rendering exception.
               </p>

@@ -91,7 +91,7 @@ export const WorkspacesPanel: React.FC<{ onCompanyClick?: (company: string) => v
             className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
               activeId === s.id
                 ? 'bg-[#22D3EE] text-[#050B1A] border-[#22D3EE]'
-                : 'bg-[#0E1E32] text-[#94A3B8] border-[#1C3553]/60 hover:text-white'
+                : 'bg-slate-100 dark:bg-[#0E1E32] text-slate-600 dark:text-[#94A3B8] border-slate-300 dark:border-[#1C3553]/60 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             {s.name}
@@ -106,10 +106,10 @@ export const WorkspacesPanel: React.FC<{ onCompanyClick?: (company: string) => v
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
             placeholder="New team name…"
-            className="flex-1 min-w-0 px-2.5 py-1.5 rounded-full bg-[#050B1A] border border-[#1C3553]/60 text-[12px] text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
+            className="flex-1 min-w-0 px-2.5 py-1.5 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/60 text-[12px] text-slate-800 dark:text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
             aria-label="Workspace name"
           />
-          <button onClick={handleCreate} className="p-1.5 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[#94A3B8] hover:text-white transition-colors" aria-label="Create workspace">
+          <button onClick={handleCreate} className="p-1.5 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Create workspace">
             <Plus size={13} />
           </button>
         </div>
@@ -119,24 +119,24 @@ export const WorkspacesPanel: React.FC<{ onCompanyClick?: (company: string) => v
             onChange={(e) => setCode(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleJoin(); }}
             placeholder="Invite code…"
-            className="flex-1 min-w-0 px-2.5 py-1.5 rounded-full bg-[#050B1A] border border-[#1C3553]/60 text-[12px] mono text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
+            className="flex-1 min-w-0 px-2.5 py-1.5 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/60 text-[12px] mono text-slate-800 dark:text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
             aria-label="Invite code"
           />
-          <button onClick={handleJoin} className="p-1.5 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[#94A3B8] hover:text-white transition-colors" aria-label="Join workspace">
+          <button onClick={handleJoin} className="p-1.5 rounded-full bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Join workspace">
             <LogIn size={13} />
           </button>
         </div>
       </div>
-      {notice && <p className="mono text-[11px] tracking-[0.04em] text-[#E8A253]">{notice}</p>}
+      {notice && <p className="mono text-[11px] tracking-[0.04em] text-[#B45309] dark:text-[#E8A253]">{notice}</p>}
 
       {active ? (
-        <div className="rounded-[12px] border border-[#1C3553]/40 bg-[#050B1A]/60 p-3 space-y-2.5">
+        <div className="rounded-[12px] border border-slate-200 dark:border-[#1C3553]/40 bg-white dark:bg-[#050B1A]/60 p-3 space-y-2.5">
           <div className="flex items-center gap-2">
-            <Users size={13} className="text-[#22D3EE]" />
-            <span className="text-[12px] font-bold text-white">{active.name}</span>
+            <Users size={13} className="text-[#0284C7] dark:text-[#22D3EE]" />
+            <span className="text-[12px] font-bold text-slate-900 dark:text-white">{active.name}</span>
             <span className="mono text-[10px] text-[#475569]">{detail?.members?.length ?? 0} members</span>
             {active.invite_code && (
-              <button onClick={copyCode} className="ml-auto inline-flex items-center gap-1 mono text-[10px] text-[#64748B] hover:text-white transition-colors" title="Copy invite code">
+              <button onClick={copyCode} className="ml-auto inline-flex items-center gap-1 mono text-[10px] text-[#64748B] hover:text-slate-900 dark:hover:text-white transition-colors" title="Copy invite code">
                 {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? 'copied' : active.invite_code}
               </button>
             )}
@@ -145,14 +145,14 @@ export const WorkspacesPanel: React.FC<{ onCompanyClick?: (company: string) => v
             <p className="mono text-[10px] tracking-[0.08em] text-[#475569] mb-1.5">SHARED WATCHLIST</p>
             <div className="flex flex-wrap gap-1.5 mb-1.5">
               {(detail?.watchlist || []).map((c: string) => (
-                <span key={c} className="inline-flex items-center gap-1 rounded-full bg-[#E8A253]/10 border border-[#E8A253]/15 pl-2.5 pr-1 py-0.5 text-[11px] font-semibold text-[#E8A253]">
-                  <button onClick={() => onCompanyClick?.(c)} className="hover:text-white transition-colors">{c}</button>
+                <span key={c} className="inline-flex items-center gap-1 rounded-full bg-[#E8A253]/10 border border-[#E8A253]/15 pl-2.5 pr-1 py-0.5 text-[11px] font-semibold text-[#B45309] dark:text-[#E8A253]">
+                  <button onClick={() => onCompanyClick?.(c)} className="hover:text-slate-900 dark:hover:text-white transition-colors">{c}</button>
                   <button
                     onClick={async () => {
                       const list = await removeWorkspaceCompany(active.id, c);
                       setDetail({ ...(detail || {}), watchlist: list });
                     }}
-                    className="p-0.5 rounded-full hover:text-white transition-colors"
+                    className="p-0.5 rounded-full hover:text-slate-900 dark:hover:text-white transition-colors"
                     aria-label={`Remove ${c}`}
                   >
                     <X size={11} />
@@ -166,10 +166,10 @@ export const WorkspacesPanel: React.FC<{ onCompanyClick?: (company: string) => v
                 onChange={(e) => setCompany(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleAddCompany(); }}
                 placeholder="Add company…"
-                className="flex-1 min-w-0 px-2.5 py-1 rounded-full bg-[#050B1A] border border-[#1C3553]/60 text-[11px] text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#E8A253]/40"
+                className="flex-1 min-w-0 px-2.5 py-1 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/60 text-[11px] text-slate-800 dark:text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#E8A253]/40"
                 aria-label="Add shared company"
               />
-              <button onClick={handleAddCompany} className="px-2.5 py-1 rounded-full bg-[#E8A253]/10 border border-[#E8A253]/20 text-[11px] font-semibold text-[#E8A253] hover:bg-[#E8A253]/15 transition-colors">
+              <button onClick={handleAddCompany} className="px-2.5 py-1 rounded-full bg-[#E8A253]/10 border border-[#E8A253]/20 text-[11px] font-semibold text-[#B45309] dark:text-[#E8A253] hover:bg-[#E8A253]/15 transition-colors">
                 Add
               </button>
             </div>
@@ -180,7 +180,7 @@ export const WorkspacesPanel: React.FC<{ onCompanyClick?: (company: string) => v
               <ul className="space-y-1">
                 {detail.briefs.map((b: any) => (
                   <li key={b.id}>
-                    <Link to={`/b/${b.id}`} className="block truncate rounded-[8px] bg-[#0E1E32] border border-[#1C3553]/40 px-2.5 py-1.5 text-[11px] text-[#CBD5E1] hover:text-white hover:border-[#22D3EE]/25 transition-colors">
+                    <Link to={`/b/${b.id}`} className="block truncate rounded-[8px] bg-slate-100 dark:bg-[#0E1E32] border border-slate-300 dark:border-[#1C3553]/40 px-2.5 py-1.5 text-[11px] text-slate-700 dark:text-[#CBD5E1] hover:text-slate-900 dark:hover:text-white hover:border-[#22D3EE]/25 transition-colors">
                       {b.query_text}
                     </Link>
                   </li>

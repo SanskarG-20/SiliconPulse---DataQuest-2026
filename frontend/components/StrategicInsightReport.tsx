@@ -60,12 +60,12 @@ export const StrategicInsightReport: React.FC<StrategicInsightReportProps> = ({ 
 
     const getIconForSection = (id: string) => {
         switch (id) {
-            case 'evidence': return <Activity size={18} className="text-sky-400" />;
-            case 'change': return <TrendingUp size={18} className="text-emerald-400" />;
-            case 'impact': return <Zap size={18} className="text-amber-400" />;
-            case 'competitors': return <ShieldAlert size={18} className="text-red-400" />;
-            case 'outlook': return <Layers size={18} className="text-indigo-400" />;
-            case 'confidence': return <CheckCircle2 size={18} className="text-teal-400" />;
+            case 'evidence': return <Activity size={18} className="text-sky-600 dark:text-sky-400" />;
+            case 'change': return <TrendingUp size={18} className="text-emerald-600 dark:text-emerald-400" />;
+            case 'impact': return <Zap size={18} className="text-amber-600 dark:text-amber-400" />;
+            case 'competitors': return <ShieldAlert size={18} className="text-red-600 dark:text-red-400" />;
+            case 'outlook': return <Layers size={18} className="text-indigo-600 dark:text-indigo-400" />;
+            case 'confidence': return <CheckCircle2 size={18} className="text-teal-600 dark:text-teal-400" />;
             case 'ceo': return <FileText size={18} className="text-slate-800 dark:text-slate-200" />;
             default: return <FileText size={18} className="text-slate-600 dark:text-slate-400" />;
         }
@@ -101,7 +101,7 @@ export const StrategicInsightReport: React.FC<StrategicInsightReportProps> = ({ 
                         {Array.isArray(section.evidence) && section.evidence.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-3">
                                 {section.evidence.map((ev, eIdx) => (
-                                    <div key={eIdx} className="flex items-center space-x-2 px-2 md:px-3 py-1 md:py-1.5 bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg text-[9px] md:text-[10px] uppercase tracking-wide text-slate-600 dark:text-slate-400 hover:border-sky-500/30 hover:text-sky-400 transition-colors cursor-default max-w-full overflow-hidden">
+                                    <div key={eIdx} className="flex items-center space-x-2 px-2 md:px-3 py-1 md:py-1.5 bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg text-[9px] md:text-[10px] uppercase tracking-wide text-slate-600 dark:text-slate-400 hover:border-sky-500/30 hover:text-sky-600 dark:hover:text-sky-400 transition-colors cursor-default max-w-full overflow-hidden">
                                         <span className="font-black text-slate-500 shrink-0">{ev.source}</span>
                                         <span className="w-0.5 h-3 bg-slate-100 dark:bg-slate-800 shrink-0"></span>
                                         <span className="truncate">{ev.title}</span>
@@ -114,9 +114,9 @@ export const StrategicInsightReport: React.FC<StrategicInsightReportProps> = ({ 
                         {section.id === 'confidence' && (
                             <div className="mt-2">
                                 <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4 mb-2">
-                                    <div className={`inline-block px-3 py-1 rounded-md text-[10px] md:text-xs font-black uppercase tracking-widest ${(section.value || '').toLowerCase() === 'high' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                        (section.value || '').toLowerCase() === 'medium' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                            'bg-red-500/10 text-red-500 border border-red-500/20'
+                                    <div className={`inline-block px-3 py-1 rounded-md text-[10px] md:text-xs font-black uppercase tracking-widest ${(section.value || '').toLowerCase() === 'high' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25' :
+                                        (section.value || '').toLowerCase() === 'medium' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25' :
+                                            'bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/25'
                                         }`}>
                                         {section.value} Confidence
                                     </div>

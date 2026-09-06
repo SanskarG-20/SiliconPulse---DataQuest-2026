@@ -145,7 +145,7 @@ const Dashboard: React.FC = () => {
         </div>
       )}
       {toast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg border border-sky-500/30 bg-white/95 dark:bg-slate-950/95 text-sky-100 text-xs font-bold uppercase tracking-widest shadow-2xl">
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[120] px-4 py-2 rounded-lg border border-sky-500/30 bg-white/95 dark:bg-slate-950/95 text-sky-700 dark:text-sky-100 text-xs font-bold uppercase tracking-widest shadow-2xl">
           {toast}
         </div>
       )}
@@ -257,7 +257,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                   {showGraph ? '▾' : '▸'} Supply-Chain Graph Explorer
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {showGraph ? 'Hide' : 'Show'} • D3 Force • {graphSelected ? `selected ${graphSelected}` : 'click a node'}
                 </span>
               </button>
@@ -287,7 +287,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                   {showCompare ? '▾' : '▸'} Head-to-Head Comparison
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {showCompare ? 'Hide' : 'Show'} • 2–4 companies • graph overlap
                 </span>
               </button>
@@ -311,7 +311,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                   {showTeam ? '▾' : '▸'} Team & API Integrations
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {showTeam ? 'Hide' : 'Show'} • API keys • Slack alerts
                 </span>
               </button>
@@ -335,7 +335,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                   {showWorkspaces ? '▾' : '▸'} Team Workspaces
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {showWorkspaces ? 'Hide' : 'Show'} • shared watchlist • team briefs
                 </span>
               </button>
@@ -359,7 +359,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                   {showSources ? '▾' : '▸'} Custom Sources
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {showSources ? 'Hide' : 'Show'} • RSS • EDGAR daily
                 </span>
               </button>

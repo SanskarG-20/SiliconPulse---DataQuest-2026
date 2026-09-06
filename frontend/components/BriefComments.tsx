@@ -60,8 +60,8 @@ export const BriefComments: React.FC<BriefCommentsProps> = ({ briefId }) => {
       ) : (
         <ul className="space-y-2.5">
           {comments.map((c: any) => (
-            <li key={c.id} className="rounded-[10px] bg-[#050B1A] border border-[#1C3553]/40 p-3">
-              <p className="text-[13px] leading-relaxed text-[#E2E8F0] whitespace-pre-wrap break-words">{c.body}</p>
+            <li key={c.id} className="rounded-[10px] bg-white dark:bg-[#050B1A] border border-slate-200 dark:border-[#1C3553]/40 p-3">
+              <p className="text-[13px] leading-relaxed text-slate-800 dark:text-[#E2E8F0] whitespace-pre-wrap break-words">{c.body}</p>
               <p className="mt-1.5 flex items-center gap-2 mono text-[10px] tracking-[0.06em] text-[#475569]">
                 <span>{String(c.user_id || 'analyst').slice(0, 12)}</span>
                 <span>•</span>
@@ -84,7 +84,7 @@ export const BriefComments: React.FC<BriefCommentsProps> = ({ briefId }) => {
             onKeyDown={(e) => { if (e.key === 'Enter') handlePost(); }}
             placeholder="Add analysis or a follow-up question… (max 2000 chars)"
             maxLength={2000}
-            className="flex-1 min-w-0 px-3 py-2 rounded-full bg-[#050B1A] border border-[#1C3553]/60 text-[12.5px] text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
+            className="flex-1 min-w-0 px-3 py-2 rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/60 text-[12.5px] text-slate-800 dark:text-[#E2E8F0] placeholder:text-[#475569] focus:outline-none focus:border-[#22D3EE]/40"
             aria-label="Comment"
           />
           <button
@@ -99,7 +99,7 @@ export const BriefComments: React.FC<BriefCommentsProps> = ({ briefId }) => {
       </SignedIn>
       <SignedOut>
         <p className="mt-3 text-[12px] text-[#64748B]">
-          <Link to="/sign-in" className="text-[#22D3EE] hover:underline font-medium">Sign in</Link> to join the discussion.
+          <Link to="/sign-in" className="text-[#0284C7] dark:text-[#22D3EE] hover:underline font-medium">Sign in</Link> to join the discussion.
         </p>
       </SignedOut>
     </div>

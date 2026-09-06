@@ -33,20 +33,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'semiconductors',
     icon: 'Zap',
-    color: 'text-amber-400',
+    color: 'text-amber-600 dark:text-amber-400',
     templates: [
       (company) => ({
         label: `${company ?? 'Semiconductor'} Momentum`,
         query: `What changed in ${company ?? 'the semiconductor'} roadmap or capacity in the last 24 hours?`,
         icon: 'Zap',
-        color: 'text-amber-400',
+        color: 'text-amber-600 dark:text-amber-400',
         category: 'semiconductors',
       }),
       (company) => ({
         label: `${company ?? 'Foundry'} Signal Check`,
         query: `Any contract wins, yield signals, or customer shifts for ${company ?? 'leading foundries'} today?`,
         icon: 'Zap',
-        color: 'text-amber-400',
+        color: 'text-amber-600 dark:text-amber-400',
         category: 'semiconductors',
       }),
     ],
@@ -54,20 +54,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'aiInfrastructure',
     icon: 'Cpu',
-    color: 'text-sky-400',
+    color: 'text-sky-600 dark:text-sky-400',
     templates: [
       (company) => ({
         label: `${company ?? 'AI'} Infrastructure Moves`,
         query: `Which AI infrastructure moves are emerging for ${company ?? 'hyperscalers'} right now?`,
         icon: 'Cpu',
-        color: 'text-sky-400',
+        color: 'text-sky-600 dark:text-sky-400',
         category: 'aiInfrastructure',
       }),
       (company) => ({
         label: `${company ?? 'AI'} Compute Signals`,
         query: `Any cluster expansions, model launches, or spend signals tied to ${company ?? 'AI platforms'}?`,
         icon: 'Cpu',
-        color: 'text-sky-400',
+        color: 'text-sky-600 dark:text-sky-400',
         category: 'aiInfrastructure',
       }),
     ],
@@ -75,20 +75,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'supplyChain',
     icon: 'ShieldAlert',
-    color: 'text-red-400',
+    color: 'text-red-600 dark:text-red-400',
     templates: [
       (company) => ({
         label: 'Supply Chain Watch',
         query: `Any supply chain bottlenecks or export controls impacting ${company ?? 'GPU and accelerator'} availability?`,
         icon: 'ShieldAlert',
-        color: 'text-red-400',
+        color: 'text-red-600 dark:text-red-400',
         category: 'supplyChain',
       }),
       () => ({
         label: 'HBM & Packaging Pulse',
         query: 'Are there new HBM, CoWoS, or advanced packaging constraints today?',
         icon: 'ShieldAlert',
-        color: 'text-red-400',
+        color: 'text-red-600 dark:text-red-400',
         category: 'supplyChain',
       }),
     ],
@@ -96,20 +96,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'productLaunch',
     icon: 'CheckCircle2',
-    color: 'text-emerald-400',
+    color: 'text-emerald-600 dark:text-emerald-400',
     templates: [
       () => ({
         label: 'Launch Radar',
         query: 'Which AI chip, platform, or datacenter product launches surfaced in the last 48 hours?',
         icon: 'CheckCircle2',
-        color: 'text-emerald-400',
+        color: 'text-emerald-600 dark:text-emerald-400',
         category: 'productLaunch',
       }),
       (company) => ({
         label: `${company ?? 'Vendor'} Roadmap Drops`,
         query: `Any fresh roadmap reveals or product announcements tied to ${company ?? 'key vendors'}?`,
         icon: 'CheckCircle2',
-        color: 'text-emerald-400',
+        color: 'text-emerald-600 dark:text-emerald-400',
         category: 'productLaunch',
       }),
     ],
@@ -117,20 +117,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'foundryUpdates',
     icon: 'Activity',
-    color: 'text-emerald-400',
+    color: 'text-emerald-600 dark:text-emerald-400',
     templates: [
       () => ({
         label: 'Foundry Node Update',
         query: 'Foundry updates: yield shifts, node progress, or capacity moves for TSMC / Intel?',
         icon: 'Activity',
-        color: 'text-emerald-400',
+        color: 'text-emerald-600 dark:text-emerald-400',
         category: 'foundryUpdates',
       }),
       (company) => ({
         label: `${company ?? 'Foundry'} Yield Watch`,
         query: `Any yield or process node developments around ${company ?? 'leading foundries'}?`,
         icon: 'Activity',
-        color: 'text-emerald-400',
+        color: 'text-emerald-600 dark:text-emerald-400',
         category: 'foundryUpdates',
       }),
     ],
@@ -138,20 +138,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'datacenterHardware',
     icon: 'TrendingUp',
-    color: 'text-indigo-400',
+    color: 'text-indigo-600 dark:text-indigo-400',
     templates: [
       () => ({
         label: 'Datacenter Hardware Pulse',
         query: 'Datacenter hardware updates: GPUs, networking, power, or cooling signals today?',
         icon: 'TrendingUp',
-        color: 'text-indigo-400',
+        color: 'text-indigo-600 dark:text-indigo-400',
         category: 'datacenterHardware',
       }),
       () => ({
         label: 'Server Refresh Signals',
         query: 'Any signs of hyperscaler server refresh cycles or new hardware deployments?',
         icon: 'TrendingUp',
-        color: 'text-indigo-400',
+        color: 'text-indigo-600 dark:text-indigo-400',
         category: 'datacenterHardware',
       }),
     ],
@@ -173,20 +173,20 @@ const CATEGORY_POOLS: CategoryPool[] = [
   {
     key: 'globalNews',
     icon: 'AlertCircle',
-    color: 'text-amber-400',
+    color: 'text-amber-600 dark:text-amber-400',
     templates: [
       () => ({
         label: 'Global Policy Watch',
         query: 'Any global policy, subsidy, or export-control headlines affecting semiconductors today?',
         icon: 'AlertCircle',
-        color: 'text-amber-400',
+        color: 'text-amber-600 dark:text-amber-400',
         category: 'globalNews',
       }),
       () => ({
         label: 'Geopolitical Risk Pulse',
         query: 'Which geopolitical updates could impact chip supply chains this week?',
         icon: 'AlertCircle',
-        color: 'text-amber-400',
+        color: 'text-amber-600 dark:text-amber-400',
         category: 'globalNews',
       }),
     ],

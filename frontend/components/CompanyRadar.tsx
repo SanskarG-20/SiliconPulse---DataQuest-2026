@@ -37,9 +37,9 @@ export const CompanyRadar: React.FC<CompanyRadarProps> = ({ onCompanyClick, watc
   };
 
   const getTrendColor = (count: number) => {
-    if (count >= 5) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/15';
-    if (count >= 2) return 'text-slate-500 dark:text-[#64748B] bg-[#0E1E32] border-[#1C3553]/40';
-    return 'text-[#475569] bg-white dark:bg-[#050B1A] border-[#1C3553]/30';
+    if (count >= 5) return 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+    if (count >= 2) return 'text-slate-500 dark:text-[#64748B] bg-slate-100 dark:bg-[#0E1E32] border-slate-300 dark:border-[#1C3553]/40';
+    return 'text-[#475569] bg-white dark:bg-[#050B1A] border-slate-300 dark:border-[#1C3553]/30';
   };
 
   const list = viewMode === 'global' ? radarData : radarData.filter((i) => watchlist.includes(i.company));
@@ -51,11 +51,11 @@ export const CompanyRadar: React.FC<CompanyRadarProps> = ({ onCompanyClick, watc
           <span className="w-1.5 h-1.5 rounded-full bg-[#22D3EE] shadow-[0_0_8px_rgba(34,211,238,0.6)] animate-pulse" />
           COMPANY RADAR
         </h3>
-        <div className="flex rounded-full bg-white dark:bg-[#050B1A] border border-[#1C3553]/50 p-0.5">
-          <button onClick={() => setViewMode('global')} className={`px-2.5 py-1 rounded-full mono text-[10px] font-semibold tracking-[0.06em] transition-colors ${viewMode === 'global' ? 'bg-[#0E1E32] text-[#22D3EE] border border-[#1C3553]' : 'text-[#475569] hover:text-slate-600 dark:text-[#94A3B8]'}`}>
+        <div className="flex rounded-full bg-white dark:bg-[#050B1A] border border-slate-300 dark:border-[#1C3553]/50 p-0.5">
+          <button onClick={() => setViewMode('global')} className={`px-2.5 py-1 rounded-full mono text-[10px] font-semibold tracking-[0.06em] transition-colors ${viewMode === 'global' ? 'bg-slate-200 dark:bg-[#0E1E32] text-[#0284C7] dark:text-[#22D3EE] border border-slate-300 dark:border-[#1C3553]' : 'text-[#475569] hover:text-slate-600 dark:text-[#94A3B8]'}`}>
             Global
           </button>
-          <button onClick={() => setViewMode('watchlist')} className={`px-2.5 py-1 rounded-full mono text-[10px] font-semibold tracking-[0.06em] flex items-center gap-1 transition-colors ${viewMode === 'watchlist' ? 'bg-[#0E1E32] text-[#E8A253] border border-[#1C3553]' : 'text-[#475569] hover:text-slate-600 dark:text-[#94A3B8]'}`}>
+          <button onClick={() => setViewMode('watchlist')} className={`px-2.5 py-1 rounded-full mono text-[10px] font-semibold tracking-[0.06em] flex items-center gap-1 transition-colors ${viewMode === 'watchlist' ? 'bg-slate-200 dark:bg-[#0E1E32] text-[#D97706] dark:text-[#E8A253] border border-slate-300 dark:border-[#1C3553]' : 'text-[#475569] hover:text-slate-600 dark:text-[#94A3B8]'}`}>
             Pinned <span className="px-1 py-0 rounded-full bg-[#1C3553]/50 text-[9px]">{watchlist.length}</span>
           </button>
         </div>
@@ -71,7 +71,7 @@ export const CompanyRadar: React.FC<CompanyRadarProps> = ({ onCompanyClick, watc
             <button
               key={item.company}
               onClick={() => onCompanyClick?.(item.company)}
-              className="w-full flex items-center justify-between gap-2 rounded-[12px] border border-transparent hover:border-[#1C3553]/40 hover:bg-[#0E1E32]/70 bg-[#0E1E32]/30 px-2.5 py-2 text-left transition-colors group"
+              className="w-full flex items-center justify-between gap-2 rounded-[12px] border border-transparent hover:border-[#1C3553]/40 hover:bg-slate-200/60 dark:hover:bg-[#0E1E32]/70 bg-slate-100/70 dark:bg-[#0E1E32]/30 px-2.5 py-2 text-left transition-colors group"
             >
               <span className="flex items-center gap-2 min-w-0">
                 <span
@@ -87,10 +87,10 @@ export const CompanyRadar: React.FC<CompanyRadarProps> = ({ onCompanyClick, watc
                     <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
                   </svg>
                 </span>
-                <span className="text-[13px] font-medium tracking-[-0.01em] text-[#CBD5E1] group-hover:text-slate-900 dark:hover:text-white truncate">{item.company}</span>
+                <span className="text-[13px] font-medium tracking-[-0.01em] text-slate-700 dark:text-[#CBD5E1] group-hover:text-slate-900 dark:group-hover:text-white truncate">{item.company}</span>
               </span>
               <span className="flex items-center gap-1.5 shrink-0">
-                <span className={`mono text-[9px] font-bold px-1.5 py-0.5 rounded-full border tracking-[0.06em] ${item.activity_level === 'High' ? 'bg-red-500/10 text-red-400 border-red-500/15' : item.activity_level === 'Moderate' ? 'bg-[#E8A253]/10 text-[#E8A253] border-[#E8A253]/15' : 'bg-[#0E1E32] text-slate-500 dark:text-[#64748B] border-[#1C3553]/40'}`}>
+                <span className={`mono text-[9px] font-bold px-1.5 py-0.5 rounded-full border tracking-[0.06em] ${item.activity_level === 'High' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' : item.activity_level === 'Moderate' ? 'bg-[#E8A253]/10 text-[#B45309] dark:text-[#E8A253] border-[#E8A253]/25' : 'bg-slate-100 dark:bg-[#0E1E32] text-slate-500 dark:text-[#64748B] border-slate-300 dark:border-[#1C3553]/40'}`}>
                   {item.activity_level}
                 </span>
                 <span className={`w-6 h-6 rounded-full border flex items-center justify-center ${getTrendColor(item.count)}`}>{getTrendIcon(item.count)}</span>

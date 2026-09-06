@@ -564,12 +564,12 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ onSelectCompany, s
       {/* Premium header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#E2E8F0]">
+          <h3 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-[#E2E8F0]">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#38BDF8]/10 border border-[#38BDF8]/20">
               <Network size={12} className="text-[#38BDF8]" />
             </span>
             Supply-Chain Graph Explorer
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[#E8A253]/10 border border-[#E8A253]/15 px-2 py-0.5 text-[9px] font-bold tracking-[0.08em] text-[#F59E0B]">
+            <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[#E8A253]/10 border border-[#E8A253]/20 px-2 py-0.5 text-[9px] font-bold tracking-[0.08em] text-[#B45309] dark:text-[#F59E0B]">
               <Sparkles size={10} /> PREMIUM
             </span>
           </h3>
@@ -579,7 +579,7 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ onSelectCompany, s
           <span className="hidden md:inline-flex items-center rounded-full bg-white dark:bg-[#0B1220] border border-slate-300 dark:border-[#1E293B] px-2.5 py-1 text-[10px] font-medium tracking-[0.02em] text-slate-500 dark:text-[#64748B]">
             {data.nodes.length} nodes • {data.edges.length} edges
           </span>
-          <button onClick={fetchGraph} className="inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-[#0B1220] border border-slate-300 dark:border-[#1E293B] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:border-[#334155] hover:bg-[#0F172A] transition-colors">
+          <button onClick={fetchGraph} className="inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-[#0B1220] border border-slate-300 dark:border-[#1E293B] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:border-[#334155] hover:bg-slate-100 dark:hover:bg-[#0F172A] transition-colors">
             <RefreshCw size={12} /> Refresh
           </button>
         </div>
@@ -588,7 +588,7 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ onSelectCompany, s
       {/* Legend — restrained */}
       <div className="flex flex-wrap gap-1.5">
         {(Object.entries(GROUP_LABEL) as [GraphNode['group'], string][]).map(([key, label]) => (
-          <span key={key} className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 dark:border-[#1E293B] bg-white/70 dark:bg-[#0B1220]/70 px-2.5 py-1 text-[10px] font-semibold tracking-[0.04em] text-[#CBD5E1]">
+            <span key={key} className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 dark:border-[#1E293B] bg-white/70 dark:bg-[#0B1220]/70 px-2.5 py-1 text-[10px] font-semibold tracking-[0.04em] text-slate-700 dark:text-[#CBD5E1]">
             <span className="h-2 w-2 rounded-full shadow-[0_0_8px_currentColor]" style={{ background: GROUP_COLOR[key], color: GROUP_COLOR[key] }} />
             {label}
           </span>
@@ -610,12 +610,12 @@ export const GraphExplorer: React.FC<GraphExplorerProps> = ({ onSelectCompany, s
       </div>
 
       {selected ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#38BDF8]/15 bg-[#38BDF8]/[0.06] px-3.5 py-2.5 text-[12px] leading-relaxed text-[#BAE6FD]">
+        <div className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#38BDF8]/20 bg-[#38BDF8]/[0.07] px-3.5 py-2.5 text-[12px] leading-relaxed text-[#0369A1] dark:text-[#BAE6FD]">
           <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#38BDF8] text-[10px] font-black text-[#020617]">{selected.slice(0, 1)}</span>
           <span>
-            Selected <span className="font-bold text-white">{selected}</span>
+            Selected <span className="font-bold text-slate-900 dark:text-white">{selected}</span>
           </span>
-          <span className="hidden sm:inline text-[#7DD3FC]/60">— isolated to connected relationships • Use sidebar Scenario Engine to simulate shocks</span>
+          <span className="hidden sm:inline text-[#0284C7]/70 dark:text-[#7DD3FC]/60">— isolated to connected relationships • Use sidebar Scenario Engine to simulate shocks</span>
         </div>
       ) : (
         <p className="text-center text-[11px] leading-relaxed text-[#475569]">Hover any node to highlight its supply chain • Selected nodes sync to the sidebar Graph RAG panel</p>
