@@ -205,6 +205,104 @@ def insert_insight_record(
     return None
 
 
+def list_watchlist(user_id: str) -> list[str]:
+    """Return watchlisted companies for user (empty when Supabase disabled)."""
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    try:
+        resp = client.table("watchlists").select("company").eq("user_id", user_id).order("created_at").execute()
+        return [r.get("company") for r in (resp.data or []) if r.get("company")]
+    except Exception as exc:
+        logger.debug(f"list_watchlist failed for {user_id}: {exc}")
+        return []
+
+
+def add_watchlist_company(user_id: str, company: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id or not company:
+        return False
+    try:
+        client.table("watchlists").upsert(
+            {"user_id": user_id, "company": company.strip()[:100]}, on_conflict="user_id,company"
+        ).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"add_watchlist failed for {user_id}/{company}: {exc}")
+        return False
+
+
+def remove_watchlist_company(user_id: str, company: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id or not company:
+        return False
+    try:
+        client.table("watchlists").delete().eq("user_id", user_id).eq("company", company).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"remove_watchlist failed for {user_id}/{company}: {exc}")
+        return False
+
+
+def list_user_history(user_id: str, kind: str = "queries", limit: int = 10) -> list[dict]:
+    """List recent queries or insights for history UI. Returns [] when disabled."""
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    table = "insights" if kind == "insights" else "queries"
+    try:
+        resp = (
+            client.table(table).select("*").eq("user_id", user_id).order("created_at", desc=True).limit(max(1, min(limit, 25))).execute()
+        )
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_user_history({table}) failed for {user_id}: {exc}")
+        return []
+
+
+def create_brief(user_id: str, query_text: str, insight: str, evidence: list[dict] | None = None) -> str | None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return None
+    try:
+        resp = (
+            client.table("briefs")
+            .insert({"user_id": user_id, "query_text": query_text[:500], "insight": insight[:50000], "evidence": evidence or [], "is_public": True})
+            .execute()
+        )
+        data = resp.data or []
+        if data and isinstance(data, list):
+            return str(data[0].get("id")) if data[0].get("id") else None
+        return None
+    except Exception as exc:
+        logger.debug(f"create_brief failed for {user_id}: {exc}")
+        return None
+
+
+def get_brief(brief_id: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not brief_id:
+        return None
+    try:
+        resp = client.table("briefs").select("*").eq("id", brief_id).single().execute()
+        return resp.data if resp.data else None
+    except Exception as exc:
+        logger.debug(f"get_brief failed for {brief_id}: {exc}")
+        return None
+
+
+def list_briefs(user_id: str, limit: int = 10) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    try:
+        resp = client.table("briefs").select("id,query_text,created_at").eq("user_id", user_id).order("created_at", desc=True).limit(max(1, min(limit, 25))).execute()
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_briefs failed for {user_id}: {exc}")
+        return []
+
+
 def insert_signal_record(
     user_id: str,
     source: str,

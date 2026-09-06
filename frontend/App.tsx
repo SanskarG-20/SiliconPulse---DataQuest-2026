@@ -4,6 +4,7 @@ import { SignedIn, SignedOut, SignIn, SignUp, UserButton } from '@clerk/clerk-re
 import { Activity, ArrowRight, ShieldAlert, FileText, Zap } from 'lucide-react';
 import Dashboard from './components/dashboard/Dashboard';
 import { BackgroundLayer } from './components/BackgroundLayer';
+import { PublicBrief } from './components/PublicBrief';
 
 const HomePage: React.FC = () => {
   return (
@@ -145,6 +146,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/b/:id" element={<PublicBrief />} />
         <Route
           path="/sign-in/*"
           element={

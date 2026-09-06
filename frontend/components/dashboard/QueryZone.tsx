@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Layers,
   Zap,
@@ -15,7 +15,11 @@ import {
   HelpCircle,
   ArrowRight,
   RefreshCw,
+  Share2,
+  History,
+  Check,
 } from 'lucide-react';
+import { fetchQueryHistory, shareBrief } from '../../api/siliconpulseApi';
 import { QueryResponse, EvidenceItem } from '../../types';
 import { MarkdownRenderer } from '../MarkdownRenderer';
 import { StrategicInsightReport } from '../StrategicInsightReport';
@@ -108,6 +112,36 @@ export const QueryZone: React.FC<QueryZoneProps> = ({
     { label: 'High Impact Summary', query: 'What are the top 3 high-impact events in last 2 hours?', icon: AlertCircle, color: 'text-red-400' },
   ];
 
+  const [history, setHistory] = useState<any[]>([]);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!queryResult && !loading && !error) {
+      fetchQueryHistory(6).then((items) => { if (!cancelled) setHistory(items); }).catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [queryResult, loading, error]);
+
+  useEffect(() => { setShareUrl(null); setCopied(false); }, [lastSubmittedQuery]);
+
+  const handleShare = async () => {
+    if (!queryResult || sharing) return;
+    setSharing(true);
+    try {
+      const res = await shareBrief(queryResult.query, insight || '', filteredEvidenceItems as any[]);
+      if (res) {
+        setShareUrl(`${window.location.origin}/b/${res.id}`);
+      } else {
+        setShareUrl(null);
+      }
+    } finally {
+      setSharing(false);
+    }
+  };
+
   if (!queryResult && !loading && !error) {
     return (
       <div className="max-w-[760px] mx-auto space-y-8 py-2">
@@ -143,6 +177,26 @@ export const QueryZone: React.FC<QueryZoneProps> = ({
             <QuickQueryItem key={`${item.label}-${idx}`} item={item} onClick={() => onSubmit(item.query)} idx={idx} />
           ))}
         </div>
+
+        {history.length > 0 && (
+          <div className="rounded-[14px] border border-[#1C3553]/30 bg-[#0B1426]/40 p-4">
+            <p className="flex items-center gap-1.5 mono text-[10px] font-semibold tracking-[0.12em] text-[#64748B] mb-2">
+              <History size={12} /> RECENT SEARCHES
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {history.map((h: any) => (
+                <button
+                  key={h.id || h.query}
+                  onClick={() => onSubmit(h.query)}
+                  className="px-2.5 py-1 rounded-full bg-[#0E1E32] border border-[#1C3553]/60 text-[11px] font-medium text-[#94A3B8] hover:text-white hover:border-[#22D3EE]/30 transition-colors truncate max-w-[220px]"
+                  title={h.query}
+                >
+                  {h.query}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="rounded-[14px] border border-[#1C3553]/30 bg-[#0B1426]/40 p-3 flex items-center justify-between mono text-[10px] tracking-[0.08em] text-[#475569]">
           <span>Try: “TSMC N2 yield” • “ASML EUV supply” • “NVIDIA HBM”</span>
@@ -324,13 +378,25 @@ export const QueryZone: React.FC<QueryZoneProps> = ({
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-[#1C3553]/40 bg-[#0B1426]/60 p-4">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button onClick={onShowExport} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#E8A253] text-[#050B1A] text-[11px] font-bold tracking-[0.04em] hover:bg-[#F0A85E] transition-colors">
               <BarChart3 size={14} /> Export
             </button>
             <button onClick={onShowVerify} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#0E1E32] border border-[#1C3553] text-[11px] font-semibold tracking-[0.04em] text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white hover:border-[#22D3EE]/20 transition-colors">
               <HelpCircle size={14} /> Verify
             </button>
+            <button onClick={handleShare} disabled={sharing || !insight} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#22D3EE]/10 border border-[#22D3EE]/20 text-[11px] font-semibold tracking-[0.04em] text-[#22D3EE] hover:bg-[#22D3EE]/15 transition-colors disabled:opacity-50">
+              <Share2 size={14} /> {sharing ? 'Sharing…' : shareUrl ? 'Shared' : 'Share'}
+            </button>
+            {shareUrl && (
+              <button
+                onClick={async () => { try { await navigator.clipboard.writeText(shareUrl); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {} }}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#0E1E32] border border-[#22D3EE]/20 text-[11px] mono text-[#7DD3FC] hover:text-white transition-colors max-w-[260px] truncate"
+                title={shareUrl}
+              >
+                {copied ? <Check size={13} /> : null} {copied ? 'Copied' : shareUrl.replace(window.location.origin, '')} • copy link
+              </button>
+            )}
           </div>
           <span className="mono text-[10px] tracking-[0.08em] text-[#475569]">SID SP-94-ALPHA • {lastSubmittedQuery ? `Q: ${lastSubmittedQuery.slice(0, 32)}` : ''}</span>
         </div>

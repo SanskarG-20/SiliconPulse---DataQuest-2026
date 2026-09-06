@@ -415,6 +415,88 @@ export const triggerSecIngest = async (daysBack: number = 3): Promise<any> => {
     return parseJsonSafely(response, {});
 };
 
+export const fetchWatchlist = async (): Promise<{ companies: string[]; persisted: boolean }> => {
+    try {
+        const response = await apiFetch(`/watchlist`);
+        if (!response.ok) return { companies: [], persisted: false };
+        const data = await parseJsonSafely(response, { companies: [], persisted: false });
+        return { companies: Array.isArray((data as any)?.companies) ? (data as any).companies : [], persisted: !!(data as any)?.persisted };
+    } catch {
+        return { companies: [], persisted: false };
+    }
+};
+
+export const addWatchlistCompany = async (company: string): Promise<string[]> => {
+    try {
+        const response = await apiFetch(`/watchlist`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ company }) });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { companies: [] });
+        return Array.isArray((data as any)?.companies) ? (data as any).companies : [];
+    } catch {
+        return [];
+    }
+};
+
+export const removeWatchlistCompany = async (company: string): Promise<string[]> => {
+    try {
+        const response = await apiFetch(`/watchlist/${encodeURIComponent(company)}`, { method: 'DELETE' });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { companies: [] });
+        return Array.isArray((data as any)?.companies) ? (data as any).companies : [];
+    } catch {
+        return [];
+    }
+};
+
+export const fetchWatchlistAlerts = async (limit = 10): Promise<{ alerts: any[]; companies: string[] }> => {
+    try {
+        const response = await apiFetch(`/watchlist/alerts?limit=${limit}`);
+        if (!response.ok) return { alerts: [], companies: [] };
+        const data = await parseJsonSafely(response, { alerts: [], companies: [] });
+        return { alerts: Array.isArray((data as any)?.alerts) ? (data as any).alerts : [], companies: (data as any)?.companies || [] };
+    } catch {
+        return { alerts: [], companies: [] };
+    }
+};
+
+export const shareBrief = async (query: string, insight: string, evidence: any[]): Promise<{ id: string; path: string } | null> => {
+    try {
+        const response = await apiFetch(`/briefs/share`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query, insight, evidence: (evidence || []).slice(0, 20) }),
+        });
+        if (!response.ok) return null;
+        const data = await parseJsonSafely(response, null);
+        if (!data || !(data as any)?.id) return null;
+        return { id: (data as any).id, path: (data as any).path || `/b/${(data as any).id}` };
+    } catch {
+        return null;
+    }
+};
+
+export const fetchPublicBrief = async (id: string): Promise<any | null> => {
+    try {
+        const base = BASE_URL.replace('/api', '');
+        const response = await fetch(`${base}/api/briefs/public/${encodeURIComponent(id)}`);
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
+export const fetchQueryHistory = async (limit = 8): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/history/queries?limit=${limit}`);
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { items: [] });
+        return Array.isArray((data as any)?.items) ? (data as any).items : [];
+    } catch {
+        return [];
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();

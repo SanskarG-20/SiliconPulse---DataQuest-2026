@@ -11,9 +11,15 @@ from .recommendations import router as recommendations_router
 from .signals import router as signals_router
 from .sources import router as sources_router
 from .videos import router as videos_router
+from .watchlist import router as watchlist_router
+from .briefs import router as briefs_router
+from .history import router as history_router
 
 router = APIRouter(dependencies=[])
 router.include_router(auth_router, prefix="/auth", tags=["auth"])
+router.include_router(watchlist_router, prefix="", tags=["watchlist"])
+router.include_router(briefs_router, prefix="", tags=["briefs"])
+router.include_router(history_router, prefix="", tags=["history"])
 router.include_router(signals_router, prefix="", tags=["signals"])
 router.include_router(query_router, prefix="", tags=["query"])
 router.include_router(sources_router, prefix="/sources", tags=["sources"])

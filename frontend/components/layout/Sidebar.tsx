@@ -1,9 +1,11 @@
-import React from 'react';
-import { Zap, ShieldAlert } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Zap, ShieldAlert, Bell } from 'lucide-react';
 import { CompanyRadar } from '../CompanyRadar';
 import { GraphPanel } from '../GraphPanel';
+import { WatchlistAlerts } from '../WatchlistAlerts';
 import { getRelativeTimeLabel } from '../../utils/feedUtils';
 import { LiveEvent } from '../../types';
+import { fetchWatchlistAlerts } from '../../api/siliconpulseApi';
 
 interface SidebarProps {
   feed: LiveEvent[];
@@ -15,10 +17,25 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ feed, watchlist, onCompanyClick, onToggleWatchlist }) => {
   const filteredFeed = feed;
   const graphCompany = feed.find((f) => f.company && f.company !== 'Unknown')?.company || feed[0]?.company;
+  const [alerts, setAlerts] = useState<any[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (watchlist.length === 0) { setAlerts([]); return; }
+    fetchWatchlistAlerts(5).then((res) => { if (!cancelled) setAlerts(res.alerts); }).catch(() => {});
+    const id = window.setInterval(() => {
+      fetchWatchlistAlerts(5).then((res) => { if (!cancelled) setAlerts(res.alerts); }).catch(() => {});
+    }, 60000);
+    return () => { cancelled = true; window.clearInterval(id); };
+  }, [watchlist.length]);
 
   return (
     <aside className="w-[300px] shrink-0 border-r border-[#1C3553]/40 bg-[#0B1426]/50 backdrop-blur-[6px] p-4 space-y-5 hidden lg:flex lg:flex-col overflow-y-auto custom-scrollbar">
       <CompanyRadar onCompanyClick={onCompanyClick} watchlist={watchlist} onToggleWatchlist={onToggleWatchlist} />
+
+      {watchlist.length > 0 && (
+        <WatchlistAlerts alerts={alerts} watchlist={watchlist} onCompanyClick={onCompanyClick} />
+      )}
 
       <div className="space-y-3">
         <h3 className="display text-[10px] font-semibold tracking-[0.14em] text-slate-500 dark:text-[#64748B] flex items-center gap-1.5">

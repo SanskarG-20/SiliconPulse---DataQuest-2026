@@ -479,6 +479,7 @@ Lint steps are non-blocking (`|| true`); typecheck and tests are blocking.
 - [x] Ingest & vector fallback coverage (`test_ingest.py` + `test_vector_fallback.py`, 12 tests, 44 total backend)
 - [x] Distributed limiter via Redis (`limiter.py:8` `REDIS_URL`, `docker-compose.yml:redis`)
 - [x] Distributed ingestion workers (`app/workers/distributed.py` shard-aware pool, `app/workers/queue.py` Redis Stream → memory fallback, `app/workers/pathway_distributed.py` sharded Pathway, `docker-compose.yml:worker` + `WORKER_COUNT`)
+- [x] Phase 1 growth: server watchlist + in-app alerts (`GET/POST/DELETE /api/watchlist`, `GET /api/watchlist/alerts`, `WatchlistAlerts.tsx`, Supabase `watchlists` + `002_phase1.sql`), shareable briefs (`POST /api/briefs/share` → `/b/:id`, `PublicBrief.tsx`, Supabase `briefs` with public-read RLS), saved history (`GET /api/history/queries|insights` + Recent searches in `QueryZone`), real PDF export (PyMuPDF `export.py`, no stub)
 
 ---
 

@@ -473,11 +473,35 @@ export const useDashboard = (): UseDashboardReturn => {
     setShowMobileMenu(false);
   }, [handleSubmit]);
 
+  // Server-persisted watchlist (Phase 1): localStorage is instant cache, Supabase is source of truth when available
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { fetchWatchlist } = await import('../api/siliconpulseApi');
+        const res = await fetchWatchlist();
+        if (!cancelled && res.persisted && res.companies.length > 0) {
+          setWatchlist(res.companies);
+          localStorage.setItem('siliconpulse_watchlist', JSON.stringify(res.companies));
+        }
+      } catch { /* offline — keep local */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const toggleWatchlist = useCallback((company: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setWatchlist(prev => {
       const next = prev.includes(company) ? prev.filter(c => c !== company) : [...prev, company];
       localStorage.setItem('siliconpulse_watchlist', JSON.stringify(next));
+      // Fire-and-forget server sync (keeps UI instant when Supabase disabled)
+      (async () => {
+        try {
+          const api = await import('../api/siliconpulseApi');
+          if (next.includes(company)) await api.addWatchlistCompany(company);
+          else await api.removeWatchlistCompany(company);
+        } catch { /* ignore — local copy remains */ }
+      })();
       return next;
     });
   }, []);
