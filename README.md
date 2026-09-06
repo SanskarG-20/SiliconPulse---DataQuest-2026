@@ -482,6 +482,7 @@ Lint steps are non-blocking (`|| true`); typecheck and tests are blocking.
 - [x] Phase 1 growth: server watchlist + in-app alerts (`GET/POST/DELETE /api/watchlist`, `GET /api/watchlist/alerts`, `WatchlistAlerts.tsx`, Supabase `watchlists` + `002_phase1.sql`), shareable briefs (`POST /api/briefs/share` → `/b/:id`, `PublicBrief.tsx`, Supabase `briefs` with public-read RLS), saved history (`GET /api/history/queries|insights` + Recent searches in `QueryZone`), real PDF export (PyMuPDF `export.py`, no stub)
 - [x] Phase 2.1 trends: signal timeline + spike detection (`GET /api/trends?company&days`, mean + 2σ spikes, `TrendsPanel.tsx` sparkline in sidebar)
 - [x] Phase 2.2 comparison: head-to-head across 2–4 companies (`POST /api/compare`, shared `retrieval.py` helper, graph overlap + LLM verdict, `ComparePanel.tsx` collapsible in Dashboard)
+- [x] Phase 2.3 scheduled digest: morning briefing delivery (`GET/POST /api/digest/prefs`, `POST /api/digest/send-now`, `digest_service.py` Resend + Slack/Discord, hourly cron in `scheduler.py`, `DigestModal.tsx` schedule UI, Supabase `digest_prefs` + `003_digest.sql`)
 
 ---
 

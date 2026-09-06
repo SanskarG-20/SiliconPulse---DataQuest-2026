@@ -524,6 +524,44 @@ export const fetchCompare = async (companies: string[], query = '', k = 5, depth
     }
 };
 
+export const fetchDigestPrefs = async (): Promise<any> => {
+    try {
+        const response = await apiFetch(`/digest/prefs`);
+        if (!response.ok) return { enabled: false, hour_utc: 11, email: '', webhook_url: '', persisted: false };
+        return await parseJsonSafely(response, { enabled: false, hour_utc: 11, email: '', webhook_url: '', persisted: false });
+    } catch {
+        return { enabled: false, hour_utc: 11, email: '', webhook_url: '', persisted: false };
+    }
+};
+
+export const saveDigestPrefs = async (prefs: { enabled: boolean; hour_utc: number; email: string; webhook_url: string }): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/digest/prefs`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(prefs),
+        });
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
+export const sendDigestNow = async (deliver: boolean): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/digest/send-now`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deliver }),
+        }, 60000);
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();

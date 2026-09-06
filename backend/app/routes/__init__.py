@@ -5,6 +5,7 @@ from .auth import router as auth_router
 from .briefs import router as briefs_router
 from .compare import router as compare_router
 from .diagnostics import router as diagnostics_router
+from .digest import router as digest_router
 from .export import router as export_router
 from .history import router as history_router
 from .ingest import router as ingest_router
@@ -22,6 +23,7 @@ router.include_router(auth_router, prefix="/auth", tags=["auth"])
 router.include_router(watchlist_router, prefix="", tags=["watchlist"])
 router.include_router(briefs_router, prefix="", tags=["briefs"])
 router.include_router(history_router, prefix="", tags=["history"])
+router.include_router(digest_router, prefix="", tags=["digest"])
 router.include_router(signals_router, prefix="", tags=["signals"])
 router.include_router(compare_router, prefix="", tags=["compare"])
 router.include_router(trends_router, prefix="", tags=["trends"])

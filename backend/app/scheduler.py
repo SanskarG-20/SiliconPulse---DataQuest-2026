@@ -44,6 +44,17 @@ def pull_all_sources():
         logger.error(f"Error during scheduled pull: {e}", exc_info=True)
 
 
+def run_digest_cron_sync():
+    """Hourly wrapper for scheduled morning digests (best-effort)."""
+    try:
+        from app.services.digest_service import run_due_digests_sync
+
+        result = run_due_digests_sync()
+        logger.info(f"Digest cron result: {result}")
+    except Exception as e:
+        logger.warning(f"Digest cron skipped/failed: {e}")
+
+
 def pull_sec_filings_sync():
     """Sync wrapper for SEC 8-K ingestion (best-effort, async)."""
     try:
@@ -82,12 +93,17 @@ def start_scheduler():
 
         def fallback_loop():
             sec_counter = 0
+            digest_counter = 0
             while not _fallback_stop.wait(300):
                 pull_all_sources()
                 sec_counter += 1
                 if sec_counter >= 72:  # 72 * 5min = 6h
                     pull_sec_filings_sync()
                     sec_counter = 0
+                digest_counter += 1
+                if digest_counter >= 12:  # 12 * 5min = 1h
+                    run_digest_cron_sync()
+                    digest_counter = 0
 
         global _fallback_thread
         _fallback_thread = threading.Thread(target=fallback_loop, daemon=True)
@@ -100,6 +116,9 @@ def start_scheduler():
     # SEC 8-K ingestion every 6 hours (less frequent, heavier)
     if not scheduler.get_job('pull_sec'):
         scheduler.add_job(pull_sec_filings_sync, 'interval', hours=6, id='pull_sec')
+    # Morning digest delivery check every hour (prefs-gated per UTC hour)
+    if not scheduler.get_job('digest_cron'):
+        scheduler.add_job(run_digest_cron_sync, 'interval', hours=1, id='digest_cron')
     if not scheduler.running:
         scheduler.start()
     logger.info("Background scheduler started - pulling data every 5 min (news) + 6h (SEC) (first pull running in background)")

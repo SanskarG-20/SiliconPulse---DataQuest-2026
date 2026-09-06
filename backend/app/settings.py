@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     worker_batch_size: int = 50
     use_distributed_workers: bool = False
 
+    # Scheduled digest delivery (Phase 2.3)
+    resend_api_key: str = ""  # Resend API key for morning briefing emails
+    resend_from_email: str = "SiliconPulse <onboarding@resend.dev>"
+
     model_config = SettingsConfigDict(
         env_file = ".env",
         env_file_encoding = "utf-8",

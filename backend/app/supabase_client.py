@@ -303,6 +303,74 @@ def list_briefs(user_id: str, limit: int = 10) -> list[dict]:
         return []
 
 
+def get_digest_prefs(user_id: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return None
+    try:
+        resp = client.table("digest_prefs").select("*").eq("user_id", user_id).single().execute()
+        return resp.data if resp.data else None
+    except Exception as exc:
+        logger.debug(f"get_digest_prefs failed for {user_id}: {exc}")
+        return None
+
+
+def upsert_digest_prefs(
+    user_id: str,
+    enabled: bool,
+    hour_utc: int,
+    email: str | None = None,
+    webhook_url: str | None = None,
+) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return None
+    try:
+        payload: dict[str, Any] = {
+            "user_id": user_id,
+            "enabled": bool(enabled),
+            "hour_utc": max(0, min(23, int(hour_utc))),
+            "email": (email or "").strip()[:254] or None,
+            "webhook_url": (webhook_url or "").strip()[:500] or None,
+        }
+        resp = client.table("digest_prefs").upsert(payload, on_conflict="user_id").execute()
+        data = resp.data or []
+        return data[0] if data else payload
+    except Exception as exc:
+        logger.debug(f"upsert_digest_prefs failed for {user_id}: {exc}")
+        return None
+
+
+def list_due_digest_prefs(hour_utc: int) -> list[dict]:
+    """Prefs with enabled=true for this UTC hour whose last_sent_at is not today."""
+    client = get_supabase_client()
+    if client is None:
+        return []
+    try:
+        resp = client.table("digest_prefs").select("*").eq("enabled", True).eq("hour_utc", hour_utc).execute()
+        rows = resp.data or []
+        today = __import__("datetime").datetime.utcnow().date().isoformat()
+        due = []
+        for r in rows:
+            last = (r.get("last_sent_at") or "")[:10]
+            if last != today and (r.get("email") or r.get("webhook_url")):
+                due.append(r)
+        return due
+    except Exception as exc:
+        logger.debug(f"list_due_digest_prefs failed: {exc}")
+        return []
+
+
+def mark_digest_sent(user_id: str) -> None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return
+    try:
+        client.table("digest_prefs").update({"last_sent_at": __import__("datetime").datetime.utcnow().isoformat() + "Z"}).eq("user_id", user_id).execute()
+    except Exception as exc:
+        logger.debug(f"mark_digest_sent failed for {user_id}: {exc}")
+
+
 def insert_signal_record(
     user_id: str,
     source: str,
