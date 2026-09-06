@@ -624,7 +624,7 @@ export const useDashboard = (): UseDashboardReturn => {
     const tl = resolveTrustLevel(item.source, item.trust_level);
     return tl === sourceTrustFilter;
   });
-  const isInsightUnavailable = typeof insight === 'string' && insight.toLowerCase().includes('unavailable');
+  const isInsightUnavailable = typeof insight === 'string' && /unavailable|timed out|timed-out|failed|empty response/i.test(insight);
 
   const filteredFeed = feedFilter 
     ? liveFeed.filter(f => 

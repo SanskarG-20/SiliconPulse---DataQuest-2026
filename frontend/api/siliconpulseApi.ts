@@ -269,7 +269,22 @@ export const generateInsight = async (query: string, context: string, onChunk?: 
             if (onChunk) onChunk(insightText);
             return insightText;
         }
-    } catch {
+    } catch (error: any) {
+        // Surface the actual failure mode instead of a generic line: timeouts
+        // (slow/quota-hit Gemini cascade) need different user action than HTTP errors.
+        if (error?.name === "AbortError") {
+            return "Insight generation timed out after 30 seconds — Gemini is slow or over quota. The evidence above is still live. Wait a moment, then try again.";
+        }
+        const status = error?.message?.match(/status:\s*(\d{3})/)?.[1];
+        if (status === "429") {
+            return "Insight request failed (429): Gemini quota exceeded. The evidence above is still live. Wait a minute, then try again.";
+        }
+        if (status === "401" || status === "403") {
+            return "Insight request failed: authentication expired. Sign out and back in, then try again.";
+        }
+        if (status) {
+            return `Insight request failed (HTTP ${status}). The evidence above is still live. Try again.`;
+        }
         return "Insight generation unavailable. Please try again later.";
     }
 };

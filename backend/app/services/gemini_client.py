@@ -9,6 +9,34 @@ from app.settings import settings
 
 logger = logging.getLogger(__name__)
 
+# Models that cannot produce text reports — attempting generate on them only
+# burns full timeout cycles (10s x retries) before failing. Filtered at discovery.
+_NON_TEXT_HINTS = (
+    "tts",
+    "text-to-speech",
+    "image",
+    "imagen",
+    "embed",
+    "robotics",
+    "computer-use",
+    "deep-research",
+    "lyria",
+    "transcribe",
+    "nano-banana",
+    "antigravity",
+    "veo",
+)
+
+# Max models to try per request. Discovery can return 40+ models; walking the
+# whole list (each with retries + legacy fallback) exceeds the frontend's 30s
+# insight budget and turns one slow model into a guaranteed timeout.
+MAX_FALLBACK_MODELS = 3
+
+
+def _is_text_model(name: str) -> bool:
+    lowered = (name or "").lower()
+    return not any(hint in lowered for hint in _NON_TEXT_HINTS)
+
 # Try new SDK (google-genai), fallback to legacy (google-generativeai)
 try:
     from google import genai as genai_new  # type: ignore
@@ -68,7 +96,7 @@ class GeminiClient:
                         name = getattr(m, "name", str(m))
                         # Filter by supported actions if available
                         actions = getattr(m, "supported_actions", None) or getattr(m, "supported_generation_methods", None) or []
-                        if not actions or "generateContent" in actions or "generate_content" in str(actions):
+                        if (not actions or "generateContent" in actions or "generate_content" in str(actions)) and _is_text_model(name):
                             all_models.append(name)
                 except Exception as e:
                     logger.warning(f"New SDK list failed: {e}")
@@ -76,7 +104,7 @@ class GeminiClient:
             if not all_models and LEGACY_AVAILABLE:
                 try:
                     for m in genai_legacy.list_models():
-                        if "generateContent" in m.supported_generation_methods:
+                        if "generateContent" in m.supported_generation_methods and _is_text_model(m.name):
                             all_models.append(m.name)
                 except Exception as e:
                     logger.warning(f"Legacy list failed: {e}")
@@ -147,7 +175,7 @@ class GeminiClient:
                 if response_schema:
                     config_kwargs["response_mime_type"] = "application/json"
                     config_kwargs["response_schema"] = response_schema
-                
+
                 config = genai_types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
 
                 response = await asyncio.wait_for(
@@ -161,9 +189,12 @@ class GeminiClient:
                 # New SDK response has .text
                 return getattr(response, "text", str(response))
             except Exception as e:
-                # Fallback to legacy if new SDK fails with model not found
-                logger.warning(f"New SDK generate failed for {clean_name}: {e}, trying legacy if available")
-                if LEGACY_AVAILABLE:
+                # Fallback to legacy ONLY for model-not-found: any other error
+                # (quota, auth, timeout) would just burn another full retry cycle.
+                error_lower = str(e).lower()
+                is_not_found = "404" in error_lower or "not found" in error_lower or "not_found" in error_lower
+                if LEGACY_AVAILABLE and is_not_found:
+                    logger.warning(f"New SDK model not found for {clean_name}, trying legacy")
                     model = genai_legacy.GenerativeModel(model_name)
                     kwargs = {}
                     if response_schema:
@@ -172,12 +203,13 @@ class GeminiClient:
                             response_mime_type="application/json",
                             response_schema=response_schema
                         )
-                    
+
                     response = await asyncio.wait_for(
                         model.generate_content_async(prompt, **kwargs),
                         timeout=timeout,
                     )
                     return response.text
+                logger.warning(f"New SDK generate failed for {clean_name}: {e}")
                 raise
 
         if LEGACY_AVAILABLE:
@@ -200,13 +232,18 @@ class GeminiClient:
     async def generate_content_with_fallback(self, prompt: str, response_schema=None) -> str:
         """
         Generate content using available models, falling back if one is rate limited.
+        Capped at MAX_FALLBACK_MODELS so one bad key/quota cannot turn into a
+        multi-minute cascade that always outlasts the frontend timeout.
         """
         if not self.available_models:
             return "Insight generation unavailable: No Gemini models found."
 
         errors = []
+        candidates = self.available_models[:MAX_FALLBACK_MODELS]
+        if len(self.available_models) > len(candidates):
+            logger.info(f"Trying {len(candidates)} of {len(self.available_models)} models (capped)")
 
-        for model_name in self.available_models:
+        for model_name in candidates:
             try:
                 logger.info(f"Attempting generation with model: {model_name}")
                 return await self._generate_with_timeout(model_name, prompt, response_schema=response_schema)
@@ -241,7 +278,7 @@ class GeminiClient:
                 if response_schema:
                     config_kwargs["response_mime_type"] = "application/json"
                     config_kwargs["response_schema"] = response_schema
-                
+
                 config = genai_types.GenerateContentConfig(**config_kwargs) if config_kwargs else None
 
                 response = await asyncio.wait_for(
@@ -258,8 +295,10 @@ class GeminiClient:
                         yield text
                 return
             except Exception as e:
-                logger.warning(f"New SDK stream failed for {clean_name}: {e}, trying legacy if available")
-                if not LEGACY_AVAILABLE:
+                error_lower = str(e).lower()
+                is_not_found = "404" in error_lower or "not found" in error_lower or "not_found" in error_lower
+                if not LEGACY_AVAILABLE or not is_not_found:
+                    logger.warning(f"New SDK stream failed for {clean_name}: {e}")
                     raise
 
         if LEGACY_AVAILABLE:
@@ -293,7 +332,7 @@ class GeminiClient:
 
         errors = []
 
-        for model_name in self.available_models:
+        for model_name in self.available_models[:MAX_FALLBACK_MODELS]:
             try:
                 logger.info(f"Attempting stream generation with model: {model_name}")
                 async for chunk in self._generate_stream_with_timeout(model_name, prompt, response_schema=response_schema):
