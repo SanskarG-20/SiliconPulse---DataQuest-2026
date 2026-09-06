@@ -11,30 +11,35 @@ const TRACKING = new Set([
 
 function decodeEntities(str: string): string {
   if (!str || !str.includes('&')) return str;
-  // Use DOMParser for robust entity decoding (handles &#x2F; etc.)
-  try {
-    const doc = new DOMParser().parseFromString(str, 'text/html');
-    // Decode twice for double-encoded
-    let prev = str;
-    let cur = doc.documentElement.textContent || str;
-    // DOMParser already decodes once; do extra pass via textarea
-    const ta = document.createElement('textarea');
-    for (let i=0;i<2;i++) {
-      ta.innerHTML = cur;
-      const decoded = ta.value;
-      if (decoded === cur) break;
-      cur = decoded;
-    }
-    // If still contains entities, fallback to textarea
-    if (cur.includes('&') && cur.includes(';')) {
-      ta.innerHTML = cur;
-      cur = ta.value;
-    }
-    return cur;
-  } catch {
-    // Fallback regex
-    return str.replace(/&#x2F;/gi, '/').replace(/&#47;/g, '/').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'");
+  // Tag-safe manual decoding (DOMParser would strip <a href> before extraction).
+  let cur = str;
+  for (let i = 0; i < 3; i++) {
+    const prev = cur;
+    cur = cur
+      .replace(/&#x([0-9a-fA-F]+);/g, (_m, hex: string) => {
+        try {
+          return String.fromCharCode(parseInt(hex, 16));
+        } catch {
+          return _m;
+        }
+      })
+      .replace(/&#(\d+);/g, (_m, dec: string) => {
+        try {
+          return String.fromCharCode(parseInt(dec, 10));
+        } catch {
+          return _m;
+        }
+      })
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&nbsp;/g, ' ');
+    if (cur === prev) break;
   }
+  return cur;
 }
 
 function cleanUrl(url: string): string {
