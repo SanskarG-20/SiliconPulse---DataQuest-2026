@@ -281,7 +281,15 @@ Base URL locally `http://localhost:8000`; in prod via `VITE_API_BASE_URL`.
 | `GET` | `/api/graph/explain/{company}?depth=2` | Clerk | — | Human-readable supply-chain context |
 | `POST` | `/api/graph/simulate` | Clerk | `15/min` | `{company, shock: -0.9..0.9, depth, metric}` → `shocked_score = original*(1+shock)`, `$M` est, LLM scenario |
 | `GET` | `/api/videos?query&category&limit` | Clerk | `15/min` | YouTube videos (`category=all/ai/semiconductor/product_launch/gpu/supply_chain/company_update`, `limit` 1–12, 30-min cache) |
+| `GET` | `/api/trends?company&days` | Clerk or API key | — | Daily signal counts, mean/std baseline, mean + 2σ spikes, top companies/types |
+| `POST` | `/api/compare` | Clerk or API key | `10/min` | `{companies[2-4], query?, k?, depth?}` → per-company evidence + graph overlap + LLM verdict |
+| `GET/POST` | `/api/digest/prefs` | Clerk | — | Morning briefing schedule (`enabled`, `hour_utc`, `email`, `webhook_url`) |
+| `POST` | `/api/digest/send-now` | Clerk | `5/min` | Build fresh briefing now, optionally deliver (`{deliver}`) |
+| `GET/POST/DELETE` | `/api/keys`, `/api/keys/{id}` | Clerk | `10/min` on create | API keys for bots/CI (`sp_live_…`, hash-stored, shown once; use as `X-API-Key` or `?api_key=`) |
+| `GET/POST/DELETE` | `/api/webhooks`, `/api/webhooks/{id}`, `POST /api/webhooks/test` | Clerk | `10/min` create, `5/min` test | Team Slack/Discord webhooks for spike alerts (allowlisted hosts, 1/day cap) |
 | `WS` | `/api/ws/signals?token=JWT` | Query JWT | — | Push on content hash change every 10s, `ping`→`pong`, close `4401` if auth fails |
+
+Programmatic access: `curl -H "X-API-Key: sp_live_…" http://localhost:8000/api/signals` (or `?api_key=`). API keys work everywhere Clerk JWTs do.
 
 Interactive docs when running: `http://localhost:8000/docs` (OpenAPI) and `/redoc`.
 
@@ -483,6 +491,7 @@ Lint steps are non-blocking (`|| true`); typecheck and tests are blocking.
 - [x] Phase 2.1 trends: signal timeline + spike detection (`GET /api/trends?company&days`, mean + 2σ spikes, `TrendsPanel.tsx` sparkline in sidebar)
 - [x] Phase 2.2 comparison: head-to-head across 2–4 companies (`POST /api/compare`, shared `retrieval.py` helper, graph overlap + LLM verdict, `ComparePanel.tsx` collapsible in Dashboard)
 - [x] Phase 2.3 scheduled digest: morning briefing delivery (`GET/POST /api/digest/prefs`, `POST /api/digest/send-now`, `digest_service.py` Resend + Slack/Discord, hourly cron in `scheduler.py`, `DigestModal.tsx` schedule UI, Supabase `digest_prefs` + `003_digest.sql`)
+- [x] Phase 2.4 team integrations: API keys for bots/CI (`GET/POST/DELETE /api/keys`, `sp_live_…` hash-stored, `X-API-Key`/`?api_key=` fallback in `core/auth.py`) + team Slack/Discord webhooks for spike alerts (`GET/POST/DELETE /api/webhooks`, `POST /api/webhooks/test`, hourly `spike_alerts` cron with 1/day cap, `TeamIntegrations.tsx`, Supabase `api_keys`/`team_webhooks` + `004_integrations.sql`)
 
 ---
 

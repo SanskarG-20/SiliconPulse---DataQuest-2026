@@ -371,6 +371,138 @@ def mark_digest_sent(user_id: str) -> None:
         logger.debug(f"mark_digest_sent failed for {user_id}: {exc}")
 
 
+def create_api_key(user_id: str, name: str, key_hash: str, key_prefix: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return None
+    try:
+        resp = client.table("api_keys").insert({"user_id": user_id, "name": name[:80], "key_hash": key_hash, "key_prefix": key_prefix}).execute()
+        data = resp.data or []
+        return data[0] if data else None
+    except Exception as exc:
+        logger.debug(f"create_api_key failed for {user_id}: {exc}")
+        return None
+
+
+def list_api_keys(user_id: str) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    try:
+        resp = client.table("api_keys").select("id,name,key_prefix,revoked,last_used_at,created_at").eq("user_id", user_id).order("created_at", desc=True).execute()
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_api_keys failed for {user_id}: {exc}")
+        return []
+
+
+def revoke_api_key(user_id: str, key_id: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return False
+    try:
+        client.table("api_keys").update({"revoked": True}).eq("id", key_id).eq("user_id", user_id).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"revoke_api_key failed for {key_id}: {exc}")
+        return False
+
+
+def lookup_api_key(key_hash: str) -> dict | None:
+    """Service-role lookup for API-key auth fallback. Returns row or None."""
+    client = get_supabase_client()
+    if client is None or not key_hash:
+        return None
+    try:
+        resp = client.table("api_keys").select("id,user_id,revoked").eq("key_hash", key_hash).eq("revoked", False).single().execute()
+        return resp.data if resp.data else None
+    except Exception as exc:
+        logger.debug(f"lookup_api_key failed: {exc}")
+        return None
+
+
+def touch_api_key(key_id: str) -> None:
+    client = get_supabase_client()
+    if client is None or not key_id:
+        return
+    try:
+        client.table("api_keys").update({"last_used_at": __import__("datetime").datetime.utcnow().isoformat() + "Z"}).eq("id", key_id).execute()
+    except Exception as exc:
+        logger.debug(f"touch_api_key failed for {key_id}: {exc}")
+
+
+def list_team_webhooks(user_id: str) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    try:
+        resp = client.table("team_webhooks").select("id,url,events,enabled,last_sent_at,created_at").eq("user_id", user_id).order("created_at", desc=True).execute()
+        rows = resp.data or []
+        # Redact URL to host for list views
+        for r in rows:
+            try:
+                from urllib.parse import urlparse
+
+                r["url_host"] = urlparse(r.get("url", "")).hostname or ""
+                r["url"] = ""
+            except Exception:
+                r["url_host"] = ""
+        return rows
+    except Exception as exc:
+        logger.debug(f"list_team_webhooks failed for {user_id}: {exc}")
+        return []
+
+
+def add_team_webhook(user_id: str, url: str, events: list[str]) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return None
+    try:
+        resp = client.table("team_webhooks").insert({"user_id": user_id, "url": url[:500], "events": events, "enabled": True}).execute()
+        data = resp.data or []
+        return data[0] if data else None
+    except Exception as exc:
+        logger.debug(f"add_team_webhook failed for {user_id}: {exc}")
+        return None
+
+
+def delete_team_webhook(user_id: str, webhook_id: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return False
+    try:
+        client.table("team_webhooks").delete().eq("id", webhook_id).eq("user_id", user_id).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"delete_team_webhook failed for {webhook_id}: {exc}")
+        return False
+
+
+def list_enabled_spike_webhooks() -> list[dict]:
+    """All enabled webhooks subscribed to spike.alert (service-role, for cron)."""
+    client = get_supabase_client()
+    if client is None:
+        return []
+    try:
+        resp = client.table("team_webhooks").select("*").eq("enabled", True).execute()
+        rows = [r for r in (resp.data or []) if "spike.alert" in (r.get("events") or []) and r.get("url")]
+        today = __import__("datetime").datetime.utcnow().date().isoformat()
+        return [r for r in rows if (r.get("last_sent_at") or "")[:10] != today]
+    except Exception as exc:
+        logger.debug(f"list_enabled_spike_webhooks failed: {exc}")
+        return []
+
+
+def mark_webhook_sent(webhook_id: str) -> None:
+    client = get_supabase_client()
+    if client is None or not webhook_id:
+        return
+    try:
+        client.table("team_webhooks").update({"last_sent_at": __import__("datetime").datetime.utcnow().isoformat() + "Z"}).eq("id", webhook_id).execute()
+    except Exception as exc:
+        logger.debug(f"mark_webhook_sent failed for {webhook_id}: {exc}")
+
+
 def insert_signal_record(
     user_id: str,
     source: str,

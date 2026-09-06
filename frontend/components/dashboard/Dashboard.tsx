@@ -14,6 +14,7 @@ import { MobileDrawer } from '../modals/MobileDrawer';
 import { PdfUploadModal } from '../modals/PdfUploadModal';
 import { IntelligenceVideos } from '../IntelligenceVideos';
 import { ComparePanel } from '../ComparePanel';
+import { TeamIntegrations } from '../TeamIntegrations';
 import { useDashboard } from '../../hooks/useDashboard';
 
 const Dashboard: React.FC = () => {
@@ -96,6 +97,7 @@ const Dashboard: React.FC = () => {
   const [dismissedWarn, setDismissedWarn] = React.useState(() => localStorage.getItem('dismissedLocalhostWarn') === '1');
   const [showGraph, setShowGraph] = React.useState(() => localStorage.getItem('siliconpulse_showGraph') !== '0');
   const [showCompare, setShowCompare] = React.useState(() => localStorage.getItem('siliconpulse_showCompare') === '1');
+  const [showTeam, setShowTeam] = React.useState(() => localStorage.getItem('siliconpulse_showTeam') === '1');
   const [graphSelected, setGraphSelected] = React.useState<string | null>(null);
 
   return (
@@ -288,6 +290,30 @@ const Dashboard: React.FC = () => {
               {showCompare && (
                 <div className="px-4 pb-4">
                   <ComparePanel watchlist={watchlist} onCompanyClick={handleCompanyClick} />
+                </div>
+              )}
+            </div>
+
+            {/* TEAM INTEGRATIONS */}
+            <div className="rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/30 dark:bg-slate-950/30 backdrop-blur-sm">
+              <button
+                onClick={() => {
+                  const next = !showTeam;
+                  setShowTeam(next);
+                  localStorage.setItem('siliconpulse_showTeam', next ? '1' : '0');
+                }}
+                className="flex w-full items-center justify-between p-4 text-left"
+              >
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
+                  {showTeam ? '▾' : '▸'} Team & API Integrations
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                  {showTeam ? 'Hide' : 'Show'} • API keys • Slack alerts
+                </span>
+              </button>
+              {showTeam && (
+                <div className="px-4 pb-4">
+                  <TeamIntegrations />
                 </div>
               )}
             </div>

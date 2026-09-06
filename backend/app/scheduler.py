@@ -44,6 +44,17 @@ def pull_all_sources():
         logger.error(f"Error during scheduled pull: {e}", exc_info=True)
 
 
+def run_spike_alerts_sync():
+    """Hourly wrapper for team spike alerts (best-effort, 1/day per webhook cap)."""
+    try:
+        from app.services.webhook_service import run_spike_alerts_sync as _run
+
+        result = _run()
+        logger.info(f"Spike alerts result: {result}")
+    except Exception as e:
+        logger.warning(f"Spike alerts skipped/failed: {e}")
+
+
 def run_digest_cron_sync():
     """Hourly wrapper for scheduled morning digests (best-effort)."""
     try:
@@ -103,6 +114,7 @@ def start_scheduler():
                 digest_counter += 1
                 if digest_counter >= 12:  # 12 * 5min = 1h
                     run_digest_cron_sync()
+                    run_spike_alerts_sync()
                     digest_counter = 0
 
         global _fallback_thread
@@ -119,6 +131,9 @@ def start_scheduler():
     # Morning digest delivery check every hour (prefs-gated per UTC hour)
     if not scheduler.get_job('digest_cron'):
         scheduler.add_job(run_digest_cron_sync, 'interval', hours=1, id='digest_cron')
+    # Team spike alerts every hour (global spike check, 1/day per webhook cap)
+    if not scheduler.get_job('spike_alerts'):
+        scheduler.add_job(run_spike_alerts_sync, 'interval', hours=1, id='spike_alerts')
     if not scheduler.running:
         scheduler.start()
     logger.info("Background scheduler started - pulling data every 5 min (news) + 6h (SEC) (first pull running in background)")

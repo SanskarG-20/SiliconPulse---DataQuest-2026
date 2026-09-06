@@ -562,6 +562,92 @@ export const sendDigestNow = async (deliver: boolean): Promise<any | null> => {
     }
 };
 
+export const fetchApiKeys = async (): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/keys`);
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { keys: [] });
+        return Array.isArray((data as any)?.keys) ? (data as any).keys : [];
+    } catch {
+        return [];
+    }
+};
+
+export const createApiKey = async (name: string): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/keys`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name }),
+        });
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
+export const revokeApiKey = async (id: string): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/keys/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { keys: [] });
+        return Array.isArray((data as any)?.keys) ? (data as any).keys : [];
+    } catch {
+        return [];
+    }
+};
+
+export const fetchWebhooks = async (): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/webhooks`);
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { webhooks: [] });
+        return Array.isArray((data as any)?.webhooks) ? (data as any).webhooks : [];
+    } catch {
+        return [];
+    }
+};
+
+export const addWebhook = async (url: string, events: string[] = ['spike.alert']): Promise<any[] | null> => {
+    try {
+        const response = await apiFetch(`/webhooks`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, events }),
+        });
+        if (!response.ok) return null;
+        const data = await parseJsonSafely(response, { webhooks: [] });
+        return Array.isArray((data as any)?.webhooks) ? (data as any).webhooks : [];
+    } catch {
+        return null;
+    }
+};
+
+export const deleteWebhook = async (id: string): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/webhooks/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { webhooks: [] });
+        return Array.isArray((data as any)?.webhooks) ? (data as any).webhooks : [];
+    } catch {
+        return [];
+    }
+};
+
+export const testWebhook = async (url: string): Promise<boolean> => {
+    try {
+        const response = await apiFetch(`/webhooks/test`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url }),
+        });
+        return response.ok;
+    } catch {
+        return false;
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();
