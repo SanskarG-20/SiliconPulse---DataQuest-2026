@@ -44,6 +44,28 @@ def pull_all_sources():
         logger.error(f"Error during scheduled pull: {e}", exc_info=True)
 
 
+def pull_rss_feeds_sync():
+    """Sync wrapper for custom user RSS feeds (best-effort)."""
+    try:
+        from app.sources.rss_source import pull_rss_feeds
+
+        result = pull_rss_feeds()
+        logger.info(f"RSS feeds result: {result}")
+    except Exception as e:
+        logger.warning(f"RSS feeds skipped/failed: {e}")
+
+
+def pull_edgar_sync():
+    """Sync wrapper for EDGAR full-text 8-K ingestion (best-effort, daily)."""
+    try:
+        from app.sources.edgar_source import pull_edgar_signals
+
+        count = pull_edgar_signals(days_back=7)
+        logger.info(f"EDGAR ingestion added {count} events")
+    except Exception as e:
+        logger.warning(f"EDGAR ingestion skipped/failed: {e}")
+
+
 def run_spike_alerts_sync():
     """Hourly wrapper for team spike alerts (best-effort, 1/day per webhook cap)."""
     try:
@@ -105,6 +127,7 @@ def start_scheduler():
         def fallback_loop():
             sec_counter = 0
             digest_counter = 0
+            edgar_counter = 0
             while not _fallback_stop.wait(300):
                 pull_all_sources()
                 sec_counter += 1
@@ -115,7 +138,12 @@ def start_scheduler():
                 if digest_counter >= 12:  # 12 * 5min = 1h
                     run_digest_cron_sync()
                     run_spike_alerts_sync()
+                    pull_rss_feeds_sync()
                     digest_counter = 0
+                    edgar_counter += 12
+                    if edgar_counter >= 288:  # 288 * 5min = 24h
+                        pull_edgar_sync()
+                        edgar_counter = 0
 
         global _fallback_thread
         _fallback_thread = threading.Thread(target=fallback_loop, daemon=True)
@@ -134,6 +162,12 @@ def start_scheduler():
     # Team spike alerts every hour (global spike check, 1/day per webhook cap)
     if not scheduler.get_job('spike_alerts'):
         scheduler.add_job(run_spike_alerts_sync, 'interval', hours=1, id='spike_alerts')
+    # Custom RSS feeds every hour
+    if not scheduler.get_job('rss_feeds'):
+        scheduler.add_job(pull_rss_feeds_sync, 'interval', hours=1, id='rss_feeds')
+    # EDGAR full-text 8-K daily
+    if not scheduler.get_job('edgar_daily'):
+        scheduler.add_job(pull_edgar_sync, 'interval', hours=24, id='edgar_daily')
     if not scheduler.running:
         scheduler.start()
     logger.info("Background scheduler started - pulling data every 5 min (news) + 6h (SEC) (first pull running in background)")

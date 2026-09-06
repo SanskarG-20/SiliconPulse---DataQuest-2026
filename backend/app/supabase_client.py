@@ -260,21 +260,40 @@ def list_user_history(user_id: str, kind: str = "queries", limit: int = 10) -> l
         return []
 
 
-def create_brief(user_id: str, query_text: str, insight: str, evidence: list[dict] | None = None) -> str | None:
+def create_brief(
+    user_id: str, query_text: str, insight: str, evidence: list[dict] | None = None, workspace_id: str | None = None
+) -> str | None:
     client = get_supabase_client()
     if client is None or not user_id:
         return None
+    payload: dict[str, Any] = {
+        "user_id": user_id,
+        "query_text": query_text[:500],
+        "insight": insight[:50000],
+        "evidence": evidence or [],
+        "is_public": True,
+    }
+    if workspace_id:
+        payload["workspace_id"] = workspace_id
     try:
-        resp = (
-            client.table("briefs")
-            .insert({"user_id": user_id, "query_text": query_text[:500], "insight": insight[:50000], "evidence": evidence or [], "is_public": True})
-            .execute()
-        )
+        resp = client.table("briefs").insert(payload).execute()
         data = resp.data or []
         if data and isinstance(data, list):
             return str(data[0].get("id")) if data[0].get("id") else None
         return None
     except Exception as exc:
+        # workspace_id column may not exist if 006 not applied yet — retry without it
+        if workspace_id:
+            try:
+                payload.pop("workspace_id", None)
+                resp = client.table("briefs").insert(payload).execute()
+                data = resp.data or []
+                if data and isinstance(data, list):
+                    return str(data[0].get("id")) if data[0].get("id") else None
+                return None
+            except Exception as exc2:
+                logger.debug(f"create_brief retry failed for {user_id}: {exc2}")
+                return None
         logger.debug(f"create_brief failed for {user_id}: {exc}")
         return None
 
@@ -539,6 +558,230 @@ def delete_brief_comment(comment_id: str, user_id: str) -> bool:
     except Exception as exc:
         logger.debug(f"delete_brief_comment failed for {comment_id}: {exc}")
         return False
+
+
+def create_workspace(owner_id: str, name: str, invite_code: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not owner_id:
+        return None
+    try:
+        resp = client.table("workspaces").insert({"owner_id": owner_id, "name": name[:120], "invite_code": invite_code}).execute()
+        data = resp.data or []
+        if not data:
+            return None
+        ws = data[0]
+        try:
+            client.table("workspace_members").upsert(
+                {"workspace_id": ws["id"], "user_id": owner_id, "role": "owner"}, on_conflict="workspace_id,user_id"
+            ).execute()
+        except Exception:
+            pass
+        return ws
+    except Exception as exc:
+        logger.debug(f"create_workspace failed for {owner_id}: {exc}")
+        return None
+
+
+def list_workspaces(user_id: str) -> list[dict]:
+    """Workspaces owned or joined by the user."""
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    try:
+        owned = client.table("workspaces").select("id,name,owner_id,invite_code,created_at").eq("owner_id", user_id).execute()
+        mem = client.table("workspace_members").select("workspace_id").eq("user_id", user_id).execute()
+        joined_ids = [r.get("workspace_id") for r in (mem.data or [])]
+        joined = []
+        if joined_ids:
+            joined = client.table("workspaces").select("id,name,owner_id,invite_code,created_at").in_("id", joined_ids).execute().data or []
+        seen, out = set(), []
+        for r in (owned.data or []) + joined:
+            if r.get("id") not in seen:
+                seen.add(r["id"])
+                out.append(r)
+        return out
+    except Exception as exc:
+        logger.debug(f"list_workspaces failed for {user_id}: {exc}")
+        return []
+
+
+def is_workspace_member(user_id: str, workspace_id: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id or not workspace_id:
+        return False
+    try:
+        ws = client.table("workspaces").select("id,owner_id").eq("id", workspace_id).single().execute()
+        if ws.data and ws.data.get("owner_id") == user_id:
+            return True
+        mem = client.table("workspace_members").select("workspace_id").eq("workspace_id", workspace_id).eq("user_id", user_id).execute()
+        return bool(mem.data)
+    except Exception as exc:
+        logger.debug(f"is_workspace_member failed: {exc}")
+        return False
+
+
+def join_workspace(user_id: str, invite_code: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not user_id or not invite_code:
+        return None
+    try:
+        ws = client.table("workspaces").select("id,name").eq("invite_code", invite_code.strip()).single().execute()
+        if not ws.data:
+            return None
+        client.table("workspace_members").upsert(
+            {"workspace_id": ws.data["id"], "user_id": user_id, "role": "member"}, on_conflict="workspace_id,user_id"
+        ).execute()
+        return ws.data
+    except Exception as exc:
+        logger.debug(f"join_workspace failed: {exc}")
+        return None
+
+
+def leave_workspace(user_id: str, workspace_id: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return False
+    try:
+        client.table("workspace_members").delete().eq("workspace_id", workspace_id).eq("user_id", user_id).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"leave_workspace failed: {exc}")
+        return False
+
+
+def list_workspace_members(workspace_id: str) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not workspace_id:
+        return []
+    try:
+        resp = client.table("workspace_members").select("user_id,role,created_at").eq("workspace_id", workspace_id).execute()
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_workspace_members failed: {exc}")
+        return []
+
+
+def list_workspace_watchlist(workspace_id: str) -> list[str]:
+    client = get_supabase_client()
+    if client is None or not workspace_id:
+        return []
+    try:
+        resp = client.table("workspace_watchlist").select("company").eq("workspace_id", workspace_id).order("created_at").execute()
+        return [r.get("company") for r in (resp.data or []) if r.get("company")]
+    except Exception as exc:
+        logger.debug(f"list_workspace_watchlist failed: {exc}")
+        return []
+
+
+def add_workspace_company(workspace_id: str, company: str, added_by: str | None = None) -> bool:
+    client = get_supabase_client()
+    if client is None or not workspace_id or not company:
+        return False
+    try:
+        client.table("workspace_watchlist").upsert(
+            {"workspace_id": workspace_id, "company": company.strip()[:100], "added_by": added_by}, on_conflict="workspace_id,company"
+        ).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"add_workspace_company failed: {exc}")
+        return False
+
+
+def remove_workspace_company(workspace_id: str, company: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not workspace_id:
+        return False
+    try:
+        client.table("workspace_watchlist").delete().eq("workspace_id", workspace_id).eq("company", company).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"remove_workspace_company failed: {exc}")
+        return False
+
+
+def list_workspace_briefs(workspace_id: str) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not workspace_id:
+        return []
+    try:
+        resp = client.table("briefs").select("id,query_text,created_at").eq("workspace_id", workspace_id).order("created_at", desc=True).limit(10).execute()
+        return resp.data or []
+    except Exception:
+        # Column may not exist if 006 not applied yet
+        return []
+
+
+def list_rss_feeds(user_id: str) -> list[dict]:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return []
+    try:
+        resp = client.table("rss_feeds").select("id,url,label,enabled,last_fetched_at,last_error,created_at").eq("user_id", user_id).order("created_at").execute()
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_rss_feeds failed for {user_id}: {exc}")
+        return []
+
+
+def add_rss_feed(user_id: str, url: str, label: str) -> dict | None:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return None
+    try:
+        resp = client.table("rss_feeds").insert({"user_id": user_id, "url": url[:500], "label": (label or "")[:120], "enabled": True}).execute()
+        data = resp.data or []
+        return data[0] if data else None
+    except Exception as exc:
+        logger.debug(f"add_rss_feed failed: {exc}")
+        return None
+
+
+def delete_rss_feed(user_id: str, feed_id: str) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return False
+    try:
+        client.table("rss_feeds").delete().eq("id", feed_id).eq("user_id", user_id).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"delete_rss_feed failed: {exc}")
+        return False
+
+
+def toggle_rss_feed(user_id: str, feed_id: str, enabled: bool) -> bool:
+    client = get_supabase_client()
+    if client is None or not user_id:
+        return False
+    try:
+        client.table("rss_feeds").update({"enabled": bool(enabled)}).eq("id", feed_id).eq("user_id", user_id).execute()
+        return True
+    except Exception as exc:
+        logger.debug(f"toggle_rss_feed failed: {exc}")
+        return False
+
+
+def list_enabled_rss_feeds(limit: int = 200) -> list[dict]:
+    client = get_supabase_client()
+    if client is None:
+        return []
+    try:
+        resp = client.table("rss_feeds").select("*").eq("enabled", True).limit(max(1, min(limit, 500))).execute()
+        return resp.data or []
+    except Exception as exc:
+        logger.debug(f"list_enabled_rss_feeds failed: {exc}")
+        return []
+
+
+def touch_rss_feed(feed_id: str, error: str | None = None) -> None:
+    client = get_supabase_client()
+    if client is None or not feed_id:
+        return
+    try:
+        client.table("rss_feeds").update(
+            {"last_fetched_at": __import__("datetime").datetime.utcnow().isoformat() + "Z", "last_error": (error or "")[:300] or None}
+        ).eq("id", feed_id).execute()
+    except Exception as exc:
+        logger.debug(f"touch_rss_feed failed: {exc}")
 
 
 def insert_signal_record(

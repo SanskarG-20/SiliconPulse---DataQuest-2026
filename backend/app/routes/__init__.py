@@ -14,12 +14,14 @@ from .keys import router as keys_router
 from .llm import router as llm_router
 from .query import router as query_router
 from .recommendations import router as recommendations_router
+from .rss import router as rss_router
 from .signals import router as signals_router
 from .sources import router as sources_router
 from .trends import router as trends_router
 from .videos import router as videos_router
 from .watchlist import router as watchlist_router
 from .webhooks import router as webhooks_router
+from .workspaces import router as workspaces_router
 
 router = APIRouter(dependencies=[])
 router.include_router(auth_router, prefix="/auth", tags=["auth"])
@@ -29,7 +31,9 @@ router.include_router(history_router, prefix="", tags=["history"])
 router.include_router(digest_router, prefix="", tags=["digest"])
 router.include_router(keys_router, prefix="", tags=["keys"])
 router.include_router(webhooks_router, prefix="", tags=["webhooks"])
+router.include_router(workspaces_router, prefix="", tags=["workspaces"])
 router.include_router(signals_router, prefix="", tags=["signals"])
+router.include_router(rss_router, prefix="", tags=["rss"])
 router.include_router(compare_router, prefix="", tags=["compare"])
 router.include_router(comments_router, prefix="", tags=["comments"])
 router.include_router(trends_router, prefix="", tags=["trends"])

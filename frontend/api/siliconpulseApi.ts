@@ -684,6 +684,143 @@ export const deleteBriefComment = async (commentId: string): Promise<boolean> =>
     }
 };
 
+export const fetchWorkspaces = async (): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/workspaces`);
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { workspaces: [] });
+        return Array.isArray((data as any)?.workspaces) ? (data as any).workspaces : [];
+    } catch {
+        return [];
+    }
+};
+
+export const createWorkspace = async (name: string): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/workspaces`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name }),
+        });
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
+export const joinWorkspace = async (invite_code: string): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/workspaces/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invite_code }),
+        });
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
+export const fetchWorkspaceDetail = async (id: string): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/workspaces/${encodeURIComponent(id)}`);
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
+export const addWorkspaceCompany = async (id: string, company: string): Promise<string[]> => {
+    try {
+        const response = await apiFetch(`/workspaces/${encodeURIComponent(id)}/watchlist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ company }),
+        });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { watchlist: [] });
+        return Array.isArray((data as any)?.watchlist) ? (data as any).watchlist : [];
+    } catch {
+        return [];
+    }
+};
+
+export const removeWorkspaceCompany = async (id: string, company: string): Promise<string[]> => {
+    try {
+        const response = await apiFetch(`/workspaces/${encodeURIComponent(id)}/watchlist/${encodeURIComponent(company)}`, { method: 'DELETE' });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { watchlist: [] });
+        return Array.isArray((data as any)?.watchlist) ? (data as any).watchlist : [];
+    } catch {
+        return [];
+    }
+};
+
+export const fetchRssFeeds = async (): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/rss`);
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { feeds: [] });
+        return Array.isArray((data as any)?.feeds) ? (data as any).feeds : [];
+    } catch {
+        return [];
+    }
+};
+
+export const addRssFeed = async (url: string, label: string): Promise<any[] | null> => {
+    try {
+        const response = await apiFetch(`/rss`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, label }),
+        });
+        if (!response.ok) return null;
+        const data = await parseJsonSafely(response, { feeds: [] });
+        return Array.isArray((data as any)?.feeds) ? (data as any).feeds : [];
+    } catch {
+        return null;
+    }
+};
+
+export const deleteRssFeed = async (id: string): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/rss/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { feeds: [] });
+        return Array.isArray((data as any)?.feeds) ? (data as any).feeds : [];
+    } catch {
+        return [];
+    }
+};
+
+export const toggleRssFeed = async (id: string, enabled: boolean): Promise<any[]> => {
+    try {
+        const response = await apiFetch(`/rss/${encodeURIComponent(id)}/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled }),
+        });
+        if (!response.ok) return [];
+        const data = await parseJsonSafely(response, { feeds: [] });
+        return Array.isArray((data as any)?.feeds) ? (data as any).feeds : [];
+    } catch {
+        return [];
+    }
+};
+
+export const pullRssNow = async (): Promise<any | null> => {
+    try {
+        const response = await apiFetch(`/rss/pull-now`, { method: 'POST' }, 60000);
+        if (!response.ok) return null;
+        return await parseJsonSafely(response, null);
+    } catch {
+        return null;
+    }
+};
+
 export const fetchVideos = async (query?: string, category: string = "all", limit: number = 8): Promise<any[]> => {
     try {
         const params = new URLSearchParams();

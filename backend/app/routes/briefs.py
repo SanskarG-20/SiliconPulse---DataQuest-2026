@@ -6,7 +6,14 @@ from pydantic import BaseModel, Field
 
 from ..core.auth import get_current_user
 from ..core.limiter import limiter
-from ..supabase_client import create_brief, ensure_user, get_brief, is_supabase_enabled, list_briefs
+from ..supabase_client import (
+    create_brief,
+    ensure_user,
+    get_brief,
+    is_supabase_enabled,
+    is_workspace_member,
+    list_briefs,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +25,7 @@ class BriefShareRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=500)
     insight: str = Field(..., min_length=1, max_length=50000)
     evidence: list[dict] = Field(default_factory=list, max_length=20)
+    workspace_id: str = Field(default="", max_length=64, description="Optional workspace to share with")
 
 
 @router.post("/briefs/share")
@@ -29,10 +37,13 @@ async def share_brief(request: Request, body: BriefShareRequest, user=Depends(ge
     if not is_supabase_enabled():
         raise HTTPException(status_code=503, detail="Sharing unavailable (persistence not configured)")
     ensure_user(user_id, user.get("email"))
-    brief_id = create_brief(user_id, body.query, body.insight, body.evidence)
+    workspace_id = (body.workspace_id or "").strip() or None
+    if workspace_id and not is_workspace_member(user_id, workspace_id):
+        raise HTTPException(status_code=403, detail="Not a workspace member")
+    brief_id = create_brief(user_id, body.query, body.insight, body.evidence, workspace_id=workspace_id)
     if not brief_id:
         raise HTTPException(status_code=500, detail="Failed to create brief")
-    return {"id": brief_id, "path": f"/b/{brief_id}"}
+    return {"id": brief_id, "path": f"/b/{brief_id}", "workspace_id": workspace_id}
 
 
 @router.get("/briefs/mine")
